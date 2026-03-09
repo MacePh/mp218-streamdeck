@@ -98,6 +98,7 @@ Supported action types in pad/knob mappings:
 - `url` - open URL in browser
 - `focus_or_launch` - focus running app window or launch it if not running
 - `profile` - switch active profile
+- `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
 - `hud` - toggle the HUD overlay
 - `log` - print debug/log message
 - `noop` - no operation
@@ -107,12 +108,17 @@ Supported action types in pad/knob mappings:
 
 Top-level sections:
 
+- `config_version`
 - `midi`
 - `controller`
 - `led`
 - `status_flags_defaults`
 - `context_profiles`
 - `profiles`
+
+### `config_version`
+
+- `1`: current supported schema version
 
 ### `midi`
 
@@ -182,7 +188,7 @@ Current AI pad examples:
 - `37`: `focus_or_launch` Claude
 - `38`: `focus_or_launch` Grok
 - `39`: `cursor`
-- `40`: `start gemini`
+- `40`: `focus_or_launch` Chrome (Gemini URL)
 - `41`: `start stabilitymatrix`
 
 Bank C (`68-72`) is configured as a universal launcher bank across all profiles:
@@ -208,6 +214,7 @@ If an app command is not in PATH, replace with full executable path.
 - Safe by design: detection failures are ignored (controller loop keeps running).
 - Manual profile switching (pad actions) still works and remains authoritative.
 - After manual profile switching, context auto-switching is temporarily locked for `manual_lock_seconds`.
+- `focus_or_launch` first attempts to focus an existing process; if focus fails, it falls back to launch.
 
 ## HUD Notes
 
