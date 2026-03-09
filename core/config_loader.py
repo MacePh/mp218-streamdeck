@@ -83,6 +83,20 @@ class ConfigLoader:
         if default_profile not in profiles:
             raise ConfigError(f"default_profile '{default_profile}' does not exist in profiles")
 
+        context_profiles = config.get("context_profiles")
+        if context_profiles is not None:
+            if not isinstance(context_profiles, dict):
+                raise ConfigError("context_profiles must be an object")
+            for process_substring, profile_name in context_profiles.items():
+                if not isinstance(process_substring, str):
+                    raise ConfigError("context_profiles keys must be strings")
+                if not isinstance(profile_name, str):
+                    raise ConfigError("context_profiles values must be profile names")
+                if profile_name not in profiles:
+                    raise ConfigError(
+                        f"context_profiles maps to unknown profile '{profile_name}'"
+                    )
+
         for profile_name, profile_config in profiles.items():
             pads = profile_config.get("pads", {})
             knobs = profile_config.get("knobs", {})
@@ -92,5 +106,11 @@ class ConfigLoader:
                 raise ConfigError(f"profiles.{profile_name}.knobs must be an object")
             profile_config["pads"] = {str(note): action for note, action in pads.items()}
             profile_config["knobs"] = {str(cc): action for cc, action in knobs.items()}
+
+        if context_profiles is not None:
+            config["context_profiles"] = {
+                process_substring.lower(): profile_name
+                for process_substring, profile_name in context_profiles.items()
+            }
 
         return config

@@ -47,11 +47,24 @@
     "mic_muted": false,
     "docker_running": false
   },
+  "context_profiles": {
+    "cursor": "dev",
+    "code": "dev",
+    "obs": "stream",
+    "obs64": "stream",
+    "chatgpt": "ai",
+    "claude": "ai",
+    "grok": "ai",
+    "gemini": "ai",
+    "chrome": "ai",
+    "firefox": "ai",
+    "webcatalog": "ai"
+  },
   "profiles": {
     "dev": {
       "pads": {
         "36": { "type": "cmd", "value": "powershell" },
-        "37": { "type": "cmd", "value": "code" },
+        "37": { "type": "cmd", "value": "cursor" },
         "38": { "type": "cmd", "value": "git status" },
         "39": { "type": "cmd", "value": "docker ps" },
         "52": { "type": "profile", "value": "ai" },
@@ -69,9 +82,12 @@
     },
     "ai": {
       "pads": {
-        "36": { "type": "url", "value": "https://chat.openai.com" },
-        "37": { "type": "url", "value": "https://claude.ai" },
-        "38": { "type": "url", "value": "https://perplexity.ai" },
+        "36": { "type": "cmd", "value": "start chatgpt" },
+        "37": { "type": "cmd", "value": "start claude" },
+        "38": { "type": "cmd", "value": "start grok" },
+        "39": { "type": "cmd", "value": "cursor" },
+        "40": { "type": "cmd", "value": "start gemini" },
+        "41": { "type": "cmd", "value": "start stabilitymatrix" },
         "52": { "type": "profile", "value": "dev" },
         "53": { "type": "profile", "value": "stream" },
         "68": { "type": "log", "value": "AI bank C quick note" },

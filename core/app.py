@@ -5,6 +5,7 @@ from typing import Any
 
 from core.action_runner import ActionRunner
 from core.config_loader import ConfigLoader
+from core.context_manager import ContextManager
 from core.hot_reload import HotReloadWatcher
 from core.led_manager import LEDManager
 from core.midi_manager import MidiManager
@@ -23,6 +24,7 @@ class ControlSurfaceApp:
         self.led: LEDManager | None = None
         self.action_runner: ActionRunner | None = None
         self.hot_reload: HotReloadWatcher | None = None
+        self.context_manager: ContextManager | None = None
         self.knob_last_values: dict[int, int] = {}
 
     def log(self, message: str) -> None:
@@ -65,10 +67,23 @@ class ControlSurfaceApp:
 
         hot_reload_ms = int(self.config["controller"].get("hot_reload_interval_ms", 750))
         self.hot_reload = HotReloadWatcher(hot_reload_ms)
+        self._configure_context_manager()
 
         self.led.startup_animation()
         self.render_active_profile()
         self.log("[app] MPD218 controller ready")
+
+    def _configure_context_manager(self) -> None:
+        assert self.profile_manager is not None
+
+        mapping = self.config.get("context_profiles", {})
+        if not mapping:
+            self.context_manager = None
+            return
+
+        self.context_manager = ContextManager(mapping=mapping, logger=self.log)
+        self.context_manager.sync_profile(self.profile_manager.get_active_profile())
+        self.log(f"[context] enabled mappings={mapping}")
 
     def render_active_profile(self) -> None:
         assert self.profile_manager is not None
@@ -91,6 +106,8 @@ class ControlSurfaceApp:
             return
 
         self.state.set_active_profile(profile_name)
+        if self.context_manager is not None:
+            self.context_manager.sync_profile(profile_name)
         self.log(f"[profile] switched {old_profile} -> {profile_name}")
         self.led.profile_switch_animation()
         self.render_active_profile()
@@ -156,8 +173,26 @@ class ControlSurfaceApp:
         self.config = config
         self.profile_manager.apply_new_config(config)
         self.led.update_settings(config["midi"], config["led"])
+        self._configure_context_manager()
         self.log("[config] hot reload successful")
         self.render_active_profile()
+
+    def poll_context_profile(self) -> None:
+        assert self.profile_manager is not None
+
+        if self.context_manager is None:
+            return
+
+        target_profile = self.context_manager.update()
+        if target_profile is None:
+            return
+
+        current_profile = self.profile_manager.get_active_profile()
+        if target_profile == current_profile:
+            return
+
+        self.log(f"[context] switching profile {current_profile} -> {target_profile}")
+        self.switch_profile(target_profile)
 
     def run_loop(self) -> None:
         assert self.midi is not None
@@ -170,6 +205,7 @@ class ControlSurfaceApp:
 
         while True:
             self.try_hot_reload()
+            self.poll_context_profile()
 
             for msg in self.midi.poll_messages():
                 if log_midi:
