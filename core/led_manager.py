@@ -16,6 +16,7 @@ class LEDManager:
     ):
         self.midi = midi
         self._log = logger
+        self.current_led_state: dict[int, int] = {}
         self.update_settings(midi_config, led_config)
 
     def update_settings(self, midi_config: dict, led_config: dict) -> None:
@@ -28,6 +29,7 @@ class LEDManager:
         self.press_flash_seconds = float(led_config.get("press_flash_seconds", 0.08))
         self.profile_idle = led_config.get("profile_idle_brightness", {})
         self.indicator_pads = led_config.get("indicator_pads", {})
+        self.reserved_pads = {int(note) for note in led_config.get("reserved_pads", [])}
         self.bank_multipliers = led_config.get(
             "bank_brightness_multipliers",
             {"A": 0.9, "B": 1.0, "C": 1.1},
@@ -51,13 +53,17 @@ class LEDManager:
         return self._clamp_velocity(velocity)
 
     def send_note_on(self, note: int, velocity: int) -> None:
+        clamped_velocity = self._clamp_velocity(velocity)
+        if self.current_led_state.get(int(note)) == clamped_velocity:
+            return
         message = mido.Message(
             "note_on",
             note=int(note),
-            velocity=self._clamp_velocity(velocity),
+            velocity=clamped_velocity,
             channel=self.pad_channel,
         )
         self.midi.send(message)
+        self.current_led_state[int(note)] = clamped_velocity
         self._log(
             f"[led] note_on note={note} velocity={velocity} channel={self.pad_channel}"
         )
@@ -94,17 +100,24 @@ class LEDManager:
         self._log("[led] profile switch animation complete")
 
     def render_profile(self, profile_name: str, pad_actions: dict[str, dict]) -> None:
-        self.clear()
+        target: dict[int, int] = {
+            note: 0 for note in range(self.pad_min, self.pad_max + 1)
+        }
 
         for note_key, action in pad_actions.items():
             note = int(note_key)
+            if note in self.reserved_pads:
+                continue
             if action.get("type") == "noop":
                 continue
-            self.send_note_on(note, self.note_idle_brightness(profile_name, note))
+            target[note] = self.note_idle_brightness(profile_name, note)
 
         indicator_note = self.indicator_pads.get(profile_name)
         if indicator_note is not None:
-            self.send_note_on(int(indicator_note), self.pressed_brightness)
+            target[int(indicator_note)] = self.pressed_brightness
+
+        for note, velocity in target.items():
+            self.send_note_on(note, velocity)
 
         self._log(
             f"[led] rendered profile='{profile_name}' pads={len(pad_actions)}"

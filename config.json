@@ -2,6 +2,8 @@
   "midi": {
     "input_port": "MPD218 0",
     "output_port": "MPD218 1",
+    "auto_detect_ports": true,
+    "auto_detect_match": "MPD218",
     "pad_channel": 9,
     "pad_note_range": {
       "min": 36,
@@ -11,6 +13,7 @@
   "controller": {
     "default_profile": "dev",
     "hot_reload_interval_ms": 750,
+    "knob_change_threshold": 2,
     "log_midi_input": true
   },
   "led": {
@@ -31,6 +34,7 @@
       "ai": 82,
       "stream": 83
     },
+    "reserved_pads": [81, 82, 83],
     "animations": {
       "startup_enabled": true,
       "startup_delay_ms": 8,

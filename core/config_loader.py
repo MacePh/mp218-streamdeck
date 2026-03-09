@@ -53,11 +53,28 @@ class ConfigLoader:
             raise ConfigError("midi.pad_channel is required")
         if not isinstance(midi["pad_channel"], int) or not (0 <= midi["pad_channel"] <= 15):
             raise ConfigError("midi.pad_channel must be an integer between 0 and 15")
+        if "auto_detect_ports" in midi and not isinstance(midi["auto_detect_ports"], bool):
+            raise ConfigError("midi.auto_detect_ports must be true or false")
+        if "auto_detect_match" in midi and not isinstance(midi["auto_detect_match"], str):
+            raise ConfigError("midi.auto_detect_match must be a string")
 
         controller = config["controller"]
         default_profile = controller.get("default_profile")
         if not default_profile:
             raise ConfigError("controller.default_profile is required")
+        if "knob_change_threshold" in controller and (
+            not isinstance(controller["knob_change_threshold"], int)
+            or controller["knob_change_threshold"] < 0
+        ):
+            raise ConfigError("controller.knob_change_threshold must be an integer >= 0")
+
+        led = config["led"]
+        reserved = led.get("reserved_pads", [])
+        if not isinstance(reserved, list):
+            raise ConfigError("led.reserved_pads must be a list")
+        for note in reserved:
+            if not isinstance(note, int):
+                raise ConfigError("led.reserved_pads values must be integers")
 
         profiles = config["profiles"]
         for profile_name in ["dev", "ai", "stream"]:

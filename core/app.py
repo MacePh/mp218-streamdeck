@@ -23,6 +23,7 @@ class ControlSurfaceApp:
         self.led: LEDManager | None = None
         self.action_runner: ActionRunner | None = None
         self.hot_reload: HotReloadWatcher | None = None
+        self.knob_last_values: dict[int, int] = {}
 
     def log(self, message: str) -> None:
         print(message, flush=True)
@@ -44,6 +45,8 @@ class ControlSurfaceApp:
         self.midi = MidiManager(
             input_port_name=midi_config["input_port"],
             output_port_name=midi_config["output_port"],
+            auto_detect=bool(midi_config.get("auto_detect_ports", True)),
+            match_substring=str(midi_config.get("auto_detect_match", "MPD218")),
             logger=self.log,
         )
         self.midi.open()
@@ -73,6 +76,8 @@ class ControlSurfaceApp:
         profile = self.profile_manager.get_active_profile()
         actions = self.profile_manager.get_active_pad_actions()
         self.log(f"[profile] active={profile} actions={list(actions.keys())}")
+        if self.state is not None:
+            self.log(f"[state] {self.state.snapshot()}")
         self.led.render_profile(profile, actions)
 
     def switch_profile(self, profile_name: str) -> None:
@@ -99,10 +104,15 @@ class ControlSurfaceApp:
         self.state.set_last_pressed_pad(note)
         action = self.profile_manager.get_pad_action(note)
         active_before = self.profile_manager.get_active_profile()
+        reserved = set(self.config["led"].get("reserved_pads", []))
 
         self.log(
             f"[pad] note={note} velocity={velocity} channel={channel} profile={active_before}"
         )
+
+        if note in reserved and action.get("type") != "profile":
+            self.log(f"[pad] note {note} is reserved; ignoring non-profile action")
+            return
 
         self.led.send_note_on(note, self.led.pressed_brightness)
         profile_changed = self.action_runner.run_pad_action(action, note, velocity)
@@ -118,6 +128,11 @@ class ControlSurfaceApp:
     def handle_knob_change(self, cc: int, value: int, channel: int) -> None:
         assert self.profile_manager is not None
         assert self.action_runner is not None
+        threshold = int(self.config["controller"].get("knob_change_threshold", 2))
+        previous = self.knob_last_values.get(cc)
+        if previous is not None and abs(value - previous) < threshold:
+            return
+        self.knob_last_values[cc] = value
         action = self.profile_manager.get_knob_action(cc)
         self.log(f"[knob] cc={cc} value={value} channel={channel}")
         self.action_runner.run_knob_action(action, cc, value)
