@@ -13,7 +13,8 @@
   "controller": {
     "default_profile": "dev",
     "hot_reload_interval_ms": 750,
-    "knob_change_threshold": 2,
+    "knob_change_threshold": 1,
+    "manual_lock_seconds": 8,
     "log_midi_input": true
   },
   "led": {
@@ -69,9 +70,14 @@
         "39": { "type": "cmd", "value": "docker ps" },
         "52": { "type": "profile", "value": "ai" },
         "53": { "type": "profile", "value": "stream" },
-        "68": { "type": "log", "value": "Dev Bank C pad 68 pressed" },
-        "69": { "type": "cmd", "value": "start msedge" },
-        "70": { "type": "noop", "value": "" }
+        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
+        "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
+        "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
+        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "profile", "value": "stream" }
       },
       "knobs": {
         "1": { "type": "log", "value": "Dev knob 1 moved" },
@@ -82,17 +88,22 @@
     },
     "ai": {
       "pads": {
-        "36": { "type": "cmd", "value": "start chatgpt" },
-        "37": { "type": "cmd", "value": "start claude" },
-        "38": { "type": "cmd", "value": "start grok" },
+        "36": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
+        "37": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
+        "38": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
         "39": { "type": "cmd", "value": "cursor" },
         "40": { "type": "cmd", "value": "start gemini" },
         "41": { "type": "cmd", "value": "start stabilitymatrix" },
         "52": { "type": "profile", "value": "dev" },
         "53": { "type": "profile", "value": "stream" },
-        "68": { "type": "log", "value": "AI bank C quick note" },
-        "69": { "type": "url", "value": "https://aistudio.google.com" },
-        "70": { "type": "noop", "value": "" }
+        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
+        "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
+        "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
+        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "profile", "value": "stream" }
       },
       "knobs": {
         "1": { "type": "log", "value": "AI knob 1 moved" },
@@ -107,9 +118,14 @@
         "38": { "type": "cmd", "value": "spotify" },
         "52": { "type": "profile", "value": "dev" },
         "53": { "type": "profile", "value": "ai" },
-        "68": { "type": "log", "value": "Stream Bank C pad 68 pressed" },
-        "69": { "type": "cmd", "value": "echo STREAM_MARKER" },
-        "70": { "type": "noop", "value": "" }
+        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
+        "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
+        "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
+        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "profile", "value": "stream" }
       },
       "knobs": {
         "1": { "type": "log", "value": "Stream knob 1 moved" },

@@ -1,6 +1,15 @@
 from typing import Any, Callable
+from typing import Optional
 
 from core import platform_utils
+import psutil
+
+try:
+    import win32gui
+    import win32process
+except Exception:
+    win32gui = None
+    win32process = None
 
 
 class ActionRunner:
@@ -17,6 +26,43 @@ class ActionRunner:
 
     def run_knob_action(self, action: dict[str, Any], cc: int, cc_value: int) -> bool:
         return self._run(action, source=f"knob:{cc}", value=cc_value)
+
+    def _find_process_pid(self, process_substring: str) -> Optional[int]:
+        lowered = process_substring.lower()
+        for process in psutil.process_iter(attrs=["pid", "name"]):
+            try:
+                name = (process.info.get("name") or "").lower()
+                if lowered in name:
+                    return int(process.info["pid"])
+            except Exception:
+                continue
+        return None
+
+    def _focus_window_by_pid(self, pid: int) -> bool:
+        if win32gui is None or win32process is None:
+            return False
+
+        matched_windows: list[int] = []
+
+        def collect_windows(hwnd: int, _extra: Any) -> bool:
+            try:
+                if not win32gui.IsWindowVisible(hwnd):
+                    return True
+                _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
+                if window_pid == pid:
+                    matched_windows.append(hwnd)
+            except Exception:
+                return True
+            return True
+
+        try:
+            win32gui.EnumWindows(collect_windows, None)
+            if not matched_windows:
+                return False
+            win32gui.SetForegroundWindow(matched_windows[0])
+            return True
+        except Exception:
+            return False
 
     def _run(self, action: dict[str, Any], source: str, value: int) -> bool:
         action_type = action.get("type", "noop")
@@ -35,6 +81,27 @@ class ActionRunner:
 
             if action_type == "cmd":
                 platform_utils.run_command(str(action_value))
+                return False
+
+            if action_type == "focus_or_launch":
+                process_substring = str(action.get("process", "")).strip().lower()
+                launch_command = str(action.get("command", action_value)).strip()
+                if not process_substring:
+                    self._log("[action/error] focus_or_launch requires 'process'")
+                    return False
+                if not launch_command:
+                    self._log("[action/error] focus_or_launch requires 'command'")
+                    return False
+
+                matched_pid = self._find_process_pid(process_substring)
+                if matched_pid is not None:
+                    self._log(f"[action] focus process {process_substring}")
+                    if not self._focus_window_by_pid(matched_pid):
+                        self._log(f"[action] failed to focus process {process_substring}")
+                    return False
+
+                self._log(f"[action] launching process {process_substring}")
+                platform_utils.run_command(launch_command)
                 return False
 
             if action_type == "url":

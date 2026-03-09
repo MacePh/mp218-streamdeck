@@ -13,10 +13,12 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - press flash + restore
   - reserved indicator pads
   - diff-based rendering (reduced flicker)
+- Non-blocking press flash restore queue (no loop stall on press)
 - Knob (`control_change`) action support with threshold filtering
 - Hot reload for `config.json` (no restart needed for config edits)
 - MIDI auto-detection for renamed MPD ports
 - Context-aware profile switching on Windows (`Cursor`, `OBS`, `ChatGPT`, `Claude`, `Grok`, etc.)
+- Manual profile override lock to prevent immediate context switch bounce
 
 ## Project Layout
 
@@ -88,6 +90,7 @@ Supported action types in pad/knob mappings:
 
 - `cmd` - execute shell command
 - `url` - open URL in browser
+- `focus_or_launch` - focus running app window or launch it if not running
 - `profile` - switch active profile
 - `log` - print debug/log message
 - `noop` - no operation
@@ -117,6 +120,7 @@ Top-level sections:
 - `default_profile`: startup profile
 - `hot_reload_interval_ms`: config polling interval
 - `knob_change_threshold`: min CC delta to trigger knob actions
+- `manual_lock_seconds`: temporary context lock duration after manual profile switch
 - `log_midi_input`: verbose MIDI input logging toggle
 
 ### `led`
@@ -157,12 +161,20 @@ Each profile has:
 
 Current AI pad examples:
 
-- `36`: `start chatgpt`
-- `37`: `start claude`
-- `38`: `start grok`
+- `36`: `focus_or_launch` ChatGPT
+- `37`: `focus_or_launch` Claude
+- `38`: `focus_or_launch` Grok
 - `39`: `cursor`
 - `40`: `start gemini`
 - `41`: `start stabilitymatrix`
+
+Bank C (`68-72`) is configured as a universal launcher bank across all profiles:
+
+- `68`: ChatGPT
+- `69`: Claude
+- `70`: Grok
+- `71`: Cursor
+- `72`: Stability Matrix
 
 If an app command is not in PATH, replace with full executable path.
 
@@ -172,6 +184,7 @@ If an app command is not in PATH, replace with full executable path.
 - Uses Windows foreground window process detection.
 - Safe by design: detection failures are ignored (controller loop keeps running).
 - Manual profile switching (pad actions) still works and remains authoritative.
+- After manual profile switching, context auto-switching is temporarily locked for `manual_lock_seconds`.
 
 ## Troubleshooting
 

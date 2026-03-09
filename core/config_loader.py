@@ -67,6 +67,11 @@ class ConfigLoader:
             or controller["knob_change_threshold"] < 0
         ):
             raise ConfigError("controller.knob_change_threshold must be an integer >= 0")
+        if "manual_lock_seconds" in controller and (
+            not isinstance(controller["manual_lock_seconds"], (int, float))
+            or controller["manual_lock_seconds"] < 0
+        ):
+            raise ConfigError("controller.manual_lock_seconds must be a number >= 0")
 
         led = config["led"]
         reserved = led.get("reserved_pads", [])

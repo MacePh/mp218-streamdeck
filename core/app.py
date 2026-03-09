@@ -26,6 +26,7 @@ class ControlSurfaceApp:
         self.hot_reload: HotReloadWatcher | None = None
         self.context_manager: ContextManager | None = None
         self.knob_last_values: dict[int, int] = {}
+        self.pending_led_restore: list[tuple[int, float]] = []
 
     def log(self, message: str) -> None:
         print(message, flush=True)
@@ -108,6 +109,7 @@ class ControlSurfaceApp:
         self.state.set_active_profile(profile_name)
         if self.context_manager is not None:
             self.context_manager.sync_profile(profile_name)
+        self.pending_led_restore = []
         self.log(f"[profile] switched {old_profile} -> {profile_name}")
         self.led.profile_switch_animation()
         self.render_active_profile()
@@ -133,14 +135,22 @@ class ControlSurfaceApp:
 
         self.led.send_note_on(note, self.led.pressed_brightness)
         profile_changed = self.action_runner.run_pad_action(action, note, velocity)
-        time.sleep(self.led.press_flash_seconds)
-
-        # If profile changed, profile render already updated LEDs.
         active_after = self.profile_manager.get_active_profile()
-        if profile_changed or active_after != active_before:
+        if profile_changed:
+            manual_lock_seconds = float(
+                self.config["controller"].get("manual_lock_seconds", 8)
+            )
+            self.state.activate_manual_lock(manual_lock_seconds)
+            self.log(f"[context] manual lock for {manual_lock_seconds}s")
             return
 
-        self.led.send_note_on(note, self.led.note_idle_brightness(active_after, note))
+        # If profile changed externally, profile render already updated LEDs.
+        if active_after != active_before:
+            return
+
+        self.pending_led_restore.append(
+            (note, time.monotonic() + self.led.press_flash_seconds)
+        )
 
     def handle_knob_change(self, cc: int, value: int, channel: int) -> None:
         assert self.profile_manager is not None
@@ -179,8 +189,12 @@ class ControlSurfaceApp:
 
     def poll_context_profile(self) -> None:
         assert self.profile_manager is not None
+        assert self.state is not None
 
         if self.context_manager is None:
+            return
+
+        if self.state.is_manual_locked():
             return
 
         target_profile = self.context_manager.update()
@@ -194,6 +208,33 @@ class ControlSurfaceApp:
         self.log(f"[context] switching profile {current_profile} -> {target_profile}")
         self.switch_profile(target_profile)
 
+    def process_pending_led_restores(self) -> None:
+        assert self.profile_manager is not None
+        assert self.led is not None
+
+        if not self.pending_led_restore:
+            return
+
+        now = time.monotonic()
+        remaining: list[tuple[int, float]] = []
+        active_profile = self.profile_manager.get_active_profile()
+        active_actions = self.profile_manager.get_active_pad_actions()
+
+        for note, restore_time in self.pending_led_restore:
+            if now < restore_time:
+                remaining.append((note, restore_time))
+                continue
+
+            if str(note) not in active_actions:
+                continue
+            action = active_actions[str(note)]
+            if action.get("type") == "noop":
+                continue
+
+            self.led.send_note_on(note, self.led.note_idle_brightness(active_profile, note))
+
+        self.pending_led_restore = remaining
+
     def run_loop(self) -> None:
         assert self.midi is not None
 
@@ -206,6 +247,7 @@ class ControlSurfaceApp:
         while True:
             self.try_hot_reload()
             self.poll_context_profile()
+            self.process_pending_led_restores()
 
             for msg in self.midi.poll_messages():
                 if log_midi:
