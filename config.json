@@ -1,0 +1,101 @@
+{
+  "midi": {
+    "input_port": "MPD218 0",
+    "output_port": "MPD218 1",
+    "pad_channel": 9,
+    "pad_note_range": {
+      "min": 36,
+      "max": 83
+    }
+  },
+  "controller": {
+    "default_profile": "dev",
+    "hot_reload_interval_ms": 750,
+    "log_midi_input": true
+  },
+  "led": {
+    "pressed_brightness": 127,
+    "press_flash_seconds": 0.08,
+    "profile_idle_brightness": {
+      "dev": 60,
+      "ai": 127,
+      "stream": 20
+    },
+    "bank_brightness_multipliers": {
+      "A": 0.9,
+      "B": 1.0,
+      "C": 1.1
+    },
+    "indicator_pads": {
+      "dev": 81,
+      "ai": 82,
+      "stream": 83
+    },
+    "animations": {
+      "startup_enabled": true,
+      "startup_delay_ms": 8,
+      "profile_switch_enabled": true,
+      "profile_switch_delay_ms": 12
+    }
+  },
+  "status_flags_defaults": {
+    "obs_recording": false,
+    "mic_muted": false,
+    "docker_running": false
+  },
+  "profiles": {
+    "dev": {
+      "pads": {
+        "36": { "type": "cmd", "value": "powershell" },
+        "37": { "type": "cmd", "value": "code" },
+        "38": { "type": "cmd", "value": "git status" },
+        "39": { "type": "cmd", "value": "docker ps" },
+        "52": { "type": "profile", "value": "ai" },
+        "53": { "type": "profile", "value": "stream" },
+        "68": { "type": "log", "value": "Dev Bank C pad 68 pressed" },
+        "69": { "type": "cmd", "value": "start msedge" },
+        "70": { "type": "noop", "value": "" }
+      },
+      "knobs": {
+        "1": { "type": "log", "value": "Dev knob 1 moved" },
+        "2": { "type": "cmd", "value": "echo DEV_KNOB_2" },
+        "3": { "type": "volume_step", "value": "1" },
+        "4": { "type": "noop", "value": "" }
+      }
+    },
+    "ai": {
+      "pads": {
+        "36": { "type": "url", "value": "https://chat.openai.com" },
+        "37": { "type": "url", "value": "https://claude.ai" },
+        "38": { "type": "url", "value": "https://perplexity.ai" },
+        "52": { "type": "profile", "value": "dev" },
+        "53": { "type": "profile", "value": "stream" },
+        "68": { "type": "log", "value": "AI bank C quick note" },
+        "69": { "type": "url", "value": "https://aistudio.google.com" },
+        "70": { "type": "noop", "value": "" }
+      },
+      "knobs": {
+        "1": { "type": "log", "value": "AI knob 1 moved" },
+        "2": { "type": "cmd", "value": "echo AI_KNOB_2" },
+        "3": { "type": "noop", "value": "" }
+      }
+    },
+    "stream": {
+      "pads": {
+        "36": { "type": "cmd", "value": "obs64" },
+        "37": { "type": "cmd", "value": "discord" },
+        "38": { "type": "cmd", "value": "spotify" },
+        "52": { "type": "profile", "value": "dev" },
+        "53": { "type": "profile", "value": "ai" },
+        "68": { "type": "log", "value": "Stream Bank C pad 68 pressed" },
+        "69": { "type": "cmd", "value": "echo STREAM_MARKER" },
+        "70": { "type": "noop", "value": "" }
+      },
+      "knobs": {
+        "1": { "type": "log", "value": "Stream knob 1 moved" },
+        "2": { "type": "cmd", "value": "echo STREAM_KNOB_2" },
+        "3": { "type": "noop", "value": "" }
+      }
+    }
+  }
+}

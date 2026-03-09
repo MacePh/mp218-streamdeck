@@ -1,0 +1,79 @@
+import json
+import os
+from typing import Any
+
+
+class ConfigError(Exception):
+    pass
+
+
+class ConfigLoader:
+    def __init__(self, path: str):
+        self.path = path
+        self.last_mtime: float | None = None
+        self.current_config: dict[str, Any] | None = None
+
+    def load_initial(self) -> dict[str, Any]:
+        config = self._read_and_validate()
+        self.current_config = config
+        self.last_mtime = self._get_mtime()
+        return config
+
+    def reload_if_changed(self) -> tuple[bool, dict[str, Any] | None, str | None]:
+        current_mtime = self._get_mtime()
+        if self.last_mtime is not None and current_mtime <= self.last_mtime:
+            return False, None, None
+
+        try:
+            config = self._read_and_validate()
+        except Exception as exc:
+            return True, None, str(exc)
+
+        self.current_config = config
+        self.last_mtime = current_mtime
+        return True, config, None
+
+    def _get_mtime(self) -> float:
+        return os.path.getmtime(self.path)
+
+    def _read_and_validate(self) -> dict[str, Any]:
+        with open(self.path, "r", encoding="utf-8") as config_file:
+            raw = json.load(config_file)
+        return self._validate_and_normalize(raw)
+
+    def _validate_and_normalize(self, config: dict[str, Any]) -> dict[str, Any]:
+        for key in ["midi", "led", "controller", "profiles"]:
+            if key not in config:
+                raise ConfigError(f"Missing required key: {key}")
+
+        midi = config["midi"]
+        if "input_port" not in midi or "output_port" not in midi:
+            raise ConfigError("midi.input_port and midi.output_port are required")
+        if "pad_channel" not in midi:
+            raise ConfigError("midi.pad_channel is required")
+        if not isinstance(midi["pad_channel"], int) or not (0 <= midi["pad_channel"] <= 15):
+            raise ConfigError("midi.pad_channel must be an integer between 0 and 15")
+
+        controller = config["controller"]
+        default_profile = controller.get("default_profile")
+        if not default_profile:
+            raise ConfigError("controller.default_profile is required")
+
+        profiles = config["profiles"]
+        for profile_name in ["dev", "ai", "stream"]:
+            if profile_name not in profiles:
+                raise ConfigError(f"Missing required profile: {profile_name}")
+        if default_profile not in profiles:
+            raise ConfigError(f"default_profile '{default_profile}' does not exist in profiles")
+
+        for profile_name, profile_config in profiles.items():
+            pads = profile_config.get("pads", {})
+            knobs = profile_config.get("knobs", {})
+            if not isinstance(pads, dict):
+                raise ConfigError(f"profiles.{profile_name}.pads must be an object")
+            if not isinstance(knobs, dict):
+                raise ConfigError(f"profiles.{profile_name}.knobs must be an object")
+            profile_config["pads"] = {str(note): action for note, action in pads.items()}
+            profile_config["knobs"] = {str(cc): action for cc, action in knobs.items()}
+
+        return config
