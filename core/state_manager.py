@@ -18,6 +18,11 @@ class StateManager:
     def set_flag(self, flag_name: str, value: bool) -> None:
         self.flags[flag_name] = value
 
+    def toggle_flag(self, flag_name: str) -> bool:
+        new_value = not bool(self.flags.get(flag_name, False))
+        self.flags[flag_name] = new_value
+        return new_value
+
     def activate_manual_lock(self, seconds: float) -> None:
         self.manual_lock_until = time.monotonic() + max(0.0, float(seconds))
 

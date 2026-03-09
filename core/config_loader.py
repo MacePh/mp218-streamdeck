@@ -42,6 +42,15 @@ class ConfigLoader:
         return self._validate_and_normalize(raw)
 
     def _validate_and_normalize(self, config: dict[str, Any]) -> dict[str, Any]:
+        if "config_version" not in config:
+            raise ConfigError("Missing required key: config_version")
+        if not isinstance(config["config_version"], int):
+            raise ConfigError("config_version must be an integer")
+        if config["config_version"] != 1:
+            raise ConfigError(
+                f"Unsupported config_version '{config['config_version']}'. Expected 1."
+            )
+
         for key in ["midi", "led", "controller", "profiles"]:
             if key not in config:
                 raise ConfigError(f"Missing required key: {key}")

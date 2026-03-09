@@ -122,6 +122,7 @@ class ControlSurfaceApp:
         self.action_runner = ActionRunner(
             logger=self.log,
             on_profile_change=self.switch_profile,
+            on_toggle_flag=lambda flag: self.state.toggle_flag(flag) if self.state else False,
         )
 
         hot_reload_ms = int(self.config["controller"].get("hot_reload_interval_ms", 750))
@@ -296,9 +297,11 @@ class ControlSurfaceApp:
                 continue
 
             if str(note) not in active_actions:
+                self.led.off(note)
                 continue
             action = active_actions[str(note)]
             if action.get("type") == "noop":
+                self.led.off(note)
                 continue
 
             self.led.send_note_on(note, self.led.note_idle_brightness(active_profile, note))
@@ -324,8 +327,6 @@ class ControlSurfaceApp:
             try:
                 while True:
                     note = self.hud_trigger_queue.get_nowait()
-                    midi_config = self.config.get("midi", {})
-                    pad_channel = int(midi_config.get("pad_channel", 9))
                     self.handle_pad_press(note, 127, pad_channel)
                     self.hud_trigger_queue.task_done()
             except queue.Empty:

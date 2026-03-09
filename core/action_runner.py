@@ -17,9 +17,11 @@ class ActionRunner:
         self,
         logger: Callable[[str], None],
         on_profile_change: Callable[[str], None],
+        on_toggle_flag: Callable[[str], bool],
     ):
         self._log = logger
         self.on_profile_change = on_profile_change
+        self.on_toggle_flag = on_toggle_flag
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
         return self._run(action, source=f"pad:{note}", value=velocity)
@@ -59,7 +61,13 @@ class ActionRunner:
             win32gui.EnumWindows(collect_windows, None)
             if not matched_windows:
                 return False
-            win32gui.SetForegroundWindow(matched_windows[0])
+            target_hwnd = matched_windows[0]
+            try:
+                # Restore minimized windows before foreground focus attempt.
+                win32gui.ShowWindow(target_hwnd, 9)  # SW_RESTORE
+            except Exception:
+                pass
+            win32gui.SetForegroundWindow(target_hwnd)
             return True
         except Exception:
             return False
@@ -96,8 +104,11 @@ class ActionRunner:
                 matched_pid = self._find_process_pid(process_substring)
                 if matched_pid is not None:
                     self._log(f"[action] focus process {process_substring}")
-                    if not self._focus_window_by_pid(matched_pid):
-                        self._log(f"[action] failed to focus process {process_substring}")
+                    if self._focus_window_by_pid(matched_pid):
+                        return False
+                    self._log(f"[action] failed to focus process {process_substring}")
+                    self._log(f"[action] launching process {process_substring}")
+                    platform_utils.run_command(launch_command)
                     return False
 
                 self._log(f"[action] launching process {process_substring}")
@@ -111,6 +122,15 @@ class ActionRunner:
             if action_type == "profile":
                 self.on_profile_change(str(action_value))
                 return True
+
+            if action_type == "toggle_flag":
+                flag_name = str(action_value).strip()
+                if not flag_name:
+                    self._log("[action/error] toggle_flag requires flag name in 'value'")
+                    return False
+                new_value = self.on_toggle_flag(flag_name)
+                self._log(f"[action] toggled flag {flag_name} -> {int(new_value)}")
+                return False
 
             if action_type == "volume_step":
                 step = int(action_value) if str(action_value).strip() else 1

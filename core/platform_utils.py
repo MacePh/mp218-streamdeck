@@ -22,5 +22,4 @@ def open_url(url: str) -> bool:
 
 
 def volume_step_placeholder(step: int) -> None:
-    # Stub for future OS-level volume integration.
-    print(f"[platform] volume step placeholder: {step}")
+    print(f"[platform][warning] volume_step is not implemented yet (step={step})")

@@ -1,6 +1,7 @@
 import ctypes
 import ctypes.wintypes
 import queue
+import sys
 import threading
 import time
 import tkinter as tk
@@ -49,6 +50,7 @@ class HUDManager:
         self._hotkey_registered = False
         self._hotkey_mod = 0
         self._hotkey_vk = 0
+        self._is_windows = sys.platform == "win32"
 
     def configure(self, hud_config: dict, controller_config: dict) -> None:
         self._hud_config = {
@@ -81,7 +83,7 @@ class HUDManager:
         self._queue.put(("toggle", {"model": model, "duration_seconds": duration_seconds}))
 
     def poll_hotkey(self) -> bool:
-        if not self._hotkey_registered:
+        if not self._is_windows or not self._hotkey_registered:
             return False
         msg = ctypes.wintypes.MSG()
         triggered = False
@@ -125,6 +127,9 @@ class HUDManager:
         return mod, key_map.get(key, 0x48)
 
     def _register_hotkey(self, hotkey: str) -> None:
+        if not self._is_windows:
+            self._hotkey_registered = False
+            return
         self._unregister_hotkey()
         self._hotkey_mod, self._hotkey_vk = self._parse_hotkey(hotkey)
         ok = ctypes.windll.user32.RegisterHotKey(
@@ -137,6 +142,9 @@ class HUDManager:
             self._log(f"[hud] hotkey registration failed: {hotkey}")
 
     def _unregister_hotkey(self) -> None:
+        if not self._is_windows:
+            self._hotkey_registered = False
+            return
         if self._hotkey_registered:
             ctypes.windll.user32.UnregisterHotKey(None, self.HOTKEY_ID)
             self._hotkey_registered = False
