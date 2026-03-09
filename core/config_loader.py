@@ -72,6 +72,21 @@ class ConfigLoader:
             or controller["manual_lock_seconds"] < 0
         ):
             raise ConfigError("controller.manual_lock_seconds must be a number >= 0")
+        if "hud_pad" in controller and (
+            not isinstance(controller["hud_pad"], int)
+            or controller["hud_pad"] < 0
+            or controller["hud_pad"] > 127
+        ):
+            raise ConfigError("controller.hud_pad must be an integer between 0 and 127")
+        if "hud_toggle_key" in controller and not isinstance(
+            controller["hud_toggle_key"], str
+        ):
+            raise ConfigError("controller.hud_toggle_key must be a string")
+        if "hud_duration_seconds" in controller and (
+            not isinstance(controller["hud_duration_seconds"], (int, float))
+            or controller["hud_duration_seconds"] < 0
+        ):
+            raise ConfigError("controller.hud_duration_seconds must be a number >= 0")
 
         led = config["led"]
         reserved = led.get("reserved_pads", [])
@@ -80,6 +95,25 @@ class ConfigLoader:
         for note in reserved:
             if not isinstance(note, int):
                 raise ConfigError("led.reserved_pads values must be integers")
+
+        hud = config.get("hud")
+        if hud is not None:
+            if not isinstance(hud, dict):
+                raise ConfigError("hud must be an object")
+            if "enabled" in hud and not isinstance(hud["enabled"], bool):
+                raise ConfigError("hud.enabled must be true or false")
+            if "width" in hud and (not isinstance(hud["width"], int) or hud["width"] <= 0):
+                raise ConfigError("hud.width must be an integer > 0")
+            if "height" in hud and (
+                not isinstance(hud["height"], int) or hud["height"] <= 0
+            ):
+                raise ConfigError("hud.height must be an integer > 0")
+            if "opacity" in hud and (
+                not isinstance(hud["opacity"], (int, float))
+                or hud["opacity"] <= 0
+                or hud["opacity"] > 1
+            ):
+                raise ConfigError("hud.opacity must be a number > 0 and <= 1")
 
         profiles = config["profiles"]
         for profile_name in ["dev", "ai", "stream"]:

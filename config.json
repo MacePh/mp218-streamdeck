@@ -15,7 +15,16 @@
     "hot_reload_interval_ms": 750,
     "knob_change_threshold": 1,
     "manual_lock_seconds": 8,
+    "hud_pad": 67,
+    "hud_toggle_key": "ctrl+shift+h",
+    "hud_duration_seconds": 6,
     "log_midi_input": true
+  },
+  "hud": {
+    "enabled": true,
+    "width": 600,
+    "height": 450,
+    "opacity": 0.92
   },
   "led": {
     "pressed_brightness": 127,
@@ -68,8 +77,10 @@
         "37": { "type": "cmd", "value": "cursor" },
         "38": { "type": "cmd", "value": "git status" },
         "39": { "type": "cmd", "value": "docker ps" },
+        "51": { "type": "hud", "value": "toggle" },
         "52": { "type": "profile", "value": "ai" },
         "53": { "type": "profile", "value": "stream" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
         "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
         "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
@@ -77,7 +88,7 @@
         "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "profile", "value": "stream" }
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": { "type": "log", "value": "Dev knob 1 moved" },
@@ -94,8 +105,10 @@
         "39": { "type": "cmd", "value": "cursor" },
         "40": { "type": "cmd", "value": "start gemini" },
         "41": { "type": "cmd", "value": "start stabilitymatrix" },
+        "51": { "type": "hud", "value": "toggle" },
         "52": { "type": "profile", "value": "dev" },
         "53": { "type": "profile", "value": "stream" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
         "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
         "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
@@ -103,7 +116,7 @@
         "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "profile", "value": "stream" }
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": { "type": "log", "value": "AI knob 1 moved" },
@@ -116,8 +129,10 @@
         "36": { "type": "cmd", "value": "obs64" },
         "37": { "type": "cmd", "value": "discord" },
         "38": { "type": "cmd", "value": "spotify" },
+        "51": { "type": "hud", "value": "toggle" },
         "52": { "type": "profile", "value": "dev" },
         "53": { "type": "profile", "value": "ai" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
         "69": { "type": "focus_or_launch", "process": "claude", "command": "start claude" },
         "70": { "type": "focus_or_launch", "process": "grok", "command": "start grok" },
@@ -125,7 +140,7 @@
         "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "profile", "value": "stream" }
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": { "type": "log", "value": "Stream knob 1 moved" },

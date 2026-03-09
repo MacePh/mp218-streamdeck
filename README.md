@@ -19,6 +19,11 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
 - MIDI auto-detection for renamed MPD ports
 - Context-aware profile switching on Windows (`Cursor`, `OBS`, `ChatGPT`, `Claude`, `Grok`, etc.)
 - Manual profile override lock to prevent immediate context switch bounce
+- Interactive HUD overlay with:
+  - physical MPD218 pad orientation
+  - clickable pads and command palette search
+  - last-pressed pad highlight
+  - pad/hotkey toggles (`51`, `67`, `83`, `Ctrl+Shift+H`)
 
 ## Project Layout
 
@@ -38,6 +43,7 @@ mpd-streamdeck/
     hot_reload.py
     platform_utils.py
     context_manager.py
+    hud_manager.py
 ```
 
 ## Requirements
@@ -92,6 +98,7 @@ Supported action types in pad/knob mappings:
 - `url` - open URL in browser
 - `focus_or_launch` - focus running app window or launch it if not running
 - `profile` - switch active profile
+- `hud` - toggle the HUD overlay
 - `log` - print debug/log message
 - `noop` - no operation
 - `volume_step` - placeholder hook in `platform_utils.py`
@@ -121,6 +128,9 @@ Top-level sections:
 - `hot_reload_interval_ms`: config polling interval
 - `knob_change_threshold`: min CC delta to trigger knob actions
 - `manual_lock_seconds`: temporary context lock duration after manual profile switch
+- `hud_pad`: primary MIDI note that toggles HUD
+- `hud_toggle_key`: global keyboard hotkey for HUD toggle
+- `hud_duration_seconds`: auto-hide timeout for HUD overlay
 - `log_midi_input`: verbose MIDI input logging toggle
 
 ### `led`
@@ -132,6 +142,13 @@ Top-level sections:
 - `indicator_pads`: profile indicator pads
 - `reserved_pads`: pads excluded from macro rendering
 - `animations`: startup/profile-switch animation toggles and timings
+
+### `hud`
+
+- `enabled`: enable/disable HUD system
+- `width`: HUD window width
+- `height`: HUD window height
+- `opacity`: HUD transparency (0-1)
 
 ### `context_profiles`
 
@@ -176,6 +193,12 @@ Bank C (`68-72`) is configured as a universal launcher bank across all profiles:
 - `71`: Cursor
 - `72`: Stability Matrix
 
+HUD toggle pads are mapped in all profiles:
+
+- `51` (Bank A top-right)
+- `67` (Bank B top-right)
+- `83` (Bank C top-right)
+
 If an app command is not in PATH, replace with full executable path.
 
 ## Context Switching Notes
@@ -185,6 +208,15 @@ If an app command is not in PATH, replace with full executable path.
 - Safe by design: detection failures are ignored (controller loop keeps running).
 - Manual profile switching (pad actions) still works and remains authoritative.
 - After manual profile switching, context auto-switching is temporarily locked for `manual_lock_seconds`.
+
+## HUD Notes
+
+- HUD runs in its own thread and does not block the MIDI loop.
+- Grid orientation mirrors hardware layout:
+  - top row is highest notes (`48-51` on Bank A)
+  - bottom row is lowest notes (`36-39` on Bank A)
+- Last pressed pad is highlighted briefly (~300ms).
+- Clicking a HUD pad triggers the same action as physical pad press.
 
 ## Troubleshooting
 

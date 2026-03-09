@@ -1,12 +1,14 @@
 import argparse
 import json
 import time
+import queue
 from typing import Any
 
 from core.action_runner import ActionRunner
 from core.config_loader import ConfigLoader
 from core.context_manager import ContextManager
 from core.hot_reload import HotReloadWatcher
+from core.hud_manager import HUDManager
 from core.led_manager import LEDManager
 from core.midi_manager import MidiManager
 from core.profile_manager import ProfileManager
@@ -27,9 +29,65 @@ class ControlSurfaceApp:
         self.context_manager: ContextManager | None = None
         self.knob_last_values: dict[int, int] = {}
         self.pending_led_restore: list[tuple[int, float]] = []
+        self.current_bank = "A"
+        self.hud_manager: HUDManager | None = None
+        self.hud_trigger_queue: queue.Queue[int] = queue.Queue()
 
     def log(self, message: str) -> None:
         print(message, flush=True)
+
+    def _bank_for_note(self, note: int) -> str:
+        if 36 <= note <= 51:
+            return "A"
+        if 52 <= note <= 67:
+            return "B"
+        return "C"
+
+    def _active_app_name(self) -> str:
+        if self.context_manager is None:
+            return "unknown"
+        return self.context_manager.last_detected_process or "unknown"
+
+    def _hud_model(self) -> dict:
+        assert self.profile_manager is not None
+        assert self.state is not None
+        return {
+            "profile": self.profile_manager.get_active_profile(),
+            "bank": self.current_bank,
+            "active_app": self._active_app_name(),
+            "state": self.state.snapshot(),
+            "actions": self.profile_manager.get_active_pad_actions(),
+            "profiles": self.config.get("profiles", {}),
+        }
+
+    def _on_hud_pad_trigger(self, note: int) -> None:
+        self.hud_trigger_queue.put(int(note))
+
+    def _configure_hud_manager(self) -> None:
+        hud_cfg = self.config.get("hud", {})
+        enabled = bool(hud_cfg.get("enabled", False))
+
+        if self.hud_manager is None:
+            self.hud_manager = HUDManager(
+                logger=self.log,
+                on_pad_trigger=self._on_hud_pad_trigger,
+            )
+            self.hud_manager.start()
+
+        self.hud_manager.configure(hud_cfg, self.config.get("controller", {}))
+        if enabled:
+            self.hud_manager.update(self._hud_model())
+
+    def toggle_hud(self) -> None:
+        if self.hud_manager is None or not bool(self.config.get("hud", {}).get("enabled", False)):
+            return
+        duration = float(self.config["controller"].get("hud_duration_seconds", 6))
+        self.hud_manager.toggle(self._hud_model(), duration)
+
+    def refresh_hud(self) -> None:
+        if self.hud_manager is None or not bool(self.config.get("hud", {}).get("enabled", False)):
+            return
+        self.hud_manager.update(self._hud_model())
 
     def setup(self) -> None:
         self.config = self.config_loader.load_initial()
@@ -69,6 +127,7 @@ class ControlSurfaceApp:
         hot_reload_ms = int(self.config["controller"].get("hot_reload_interval_ms", 750))
         self.hot_reload = HotReloadWatcher(hot_reload_ms)
         self._configure_context_manager()
+        self._configure_hud_manager()
 
         self.led.startup_animation()
         self.render_active_profile()
@@ -95,6 +154,7 @@ class ControlSurfaceApp:
         if self.state is not None:
             self.log(f"[state] {self.state.snapshot()}")
         self.led.render_profile(profile, actions)
+        self.refresh_hud()
 
     def switch_profile(self, profile_name: str) -> None:
         assert self.profile_manager is not None
@@ -121,15 +181,22 @@ class ControlSurfaceApp:
         assert self.action_runner is not None
 
         self.state.set_last_pressed_pad(note)
+        self.current_bank = self._bank_for_note(note)
         action = self.profile_manager.get_pad_action(note)
         active_before = self.profile_manager.get_active_profile()
         reserved = set(self.config["led"].get("reserved_pads", []))
+        hud_pad = int(self.config["controller"].get("hud_pad", 67))
 
         self.log(
             f"[pad] note={note} velocity={velocity} channel={channel} profile={active_before}"
         )
 
-        if note in reserved and action.get("type") != "profile":
+        if note == hud_pad or action.get("type") == "hud":
+            self.toggle_hud()
+            self.refresh_hud()
+            return
+
+        if note in reserved and action.get("type") not in ("profile", "hud"):
             self.log(f"[pad] note {note} is reserved; ignoring non-profile action")
             return
 
@@ -142,6 +209,7 @@ class ControlSurfaceApp:
             )
             self.state.activate_manual_lock(manual_lock_seconds)
             self.log(f"[context] manual lock for {manual_lock_seconds}s")
+            self.refresh_hud()
             return
 
         # If profile changed externally, profile render already updated LEDs.
@@ -151,6 +219,7 @@ class ControlSurfaceApp:
         self.pending_led_restore.append(
             (note, time.monotonic() + self.led.press_flash_seconds)
         )
+        self.refresh_hud()
 
     def handle_knob_change(self, cc: int, value: int, channel: int) -> None:
         assert self.profile_manager is not None
@@ -184,6 +253,7 @@ class ControlSurfaceApp:
         self.profile_manager.apply_new_config(config)
         self.led.update_settings(config["midi"], config["led"])
         self._configure_context_manager()
+        self._configure_hud_manager()
         self.log("[config] hot reload successful")
         self.render_active_profile()
 
@@ -248,6 +318,18 @@ class ControlSurfaceApp:
             self.try_hot_reload()
             self.poll_context_profile()
             self.process_pending_led_restores()
+            if self.hud_manager is not None and self.hud_manager.poll_hotkey():
+                self.toggle_hud()
+
+            try:
+                while True:
+                    note = self.hud_trigger_queue.get_nowait()
+                    midi_config = self.config.get("midi", {})
+                    pad_channel = int(midi_config.get("pad_channel", 9))
+                    self.handle_pad_press(note, 127, pad_channel)
+                    self.hud_trigger_queue.task_done()
+            except queue.Empty:
+                pass
 
             for msg in self.midi.poll_messages():
                 if log_midi:
