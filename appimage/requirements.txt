@@ -1,0 +1,1 @@
+/media/masterp/AI-Models/mpd-streamdeck/dist/mpd218_streamdeck-0.1.0-py3-none-any.whl

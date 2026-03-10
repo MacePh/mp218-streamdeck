@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=MPD218 Streamdeck
+Comment=Akai MPD218 macro controller
+Exec=mpd218-streamdeck
+Icon=application
+Terminal=true
+Categories=AudioVideo;Utility;

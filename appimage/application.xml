@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.masterp.mpd218streamdeck</id>
+  <name>MPD218 Streamdeck</name>
+  <summary>Akai MPD218 macro controller</summary>
+  <description>
+    <p>Config-driven MPD218 control surface with profiles, MIDI actions, and LED feedback.</p>
+  </description>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <launchable type="desktop-id">application.desktop</launchable>
+</component>

@@ -12,7 +12,7 @@
     }
   },
   "controller": {
-    "default_profile": "dev",
+    "default_profile": "dev_linux",
     "hot_reload_interval_ms": 750,
     "knob_change_threshold": 1,
     "manual_lock_seconds": 8,
@@ -45,7 +45,11 @@
       "ai": 82,
       "stream": 83
     },
-    "reserved_pads": [81, 82, 83],
+    "reserved_pads": [
+      81,
+      82,
+      83
+    ],
     "animations": {
       "startup_enabled": true,
       "startup_delay_ms": 8,
@@ -59,94 +63,791 @@
     "docker_running": false
   },
   "context_profiles": {
-    "cursor": "dev",
-    "code": "dev",
-    "obs": "stream",
-    "obs64": "stream",
-    "chatgpt": "ai",
-    "claude": "ai",
-    "grok": "ai",
-    "gemini": "ai",
-    "chrome": "ai",
-    "firefox": "ai",
-    "webcatalog": "ai"
+    "cursor": "dev_linux",
+    "code": "dev_linux",
+    "obs": "stream_linux",
+    "obs64": "stream_linux",
+    "chatgpt": "ai_linux",
+    "claude": "ai_linux",
+    "grok": "ai_linux",
+    "gemini": "ai_linux",
+    "chrome": "ai_linux",
+    "firefox": "ai_linux",
+    "webcatalog": "ai_linux",
+    "phpstorm": "legacy_linux"
   },
   "profiles": {
     "dev": {
       "pads": {
-        "36": { "type": "cmd", "value": "powershell" },
-        "37": { "type": "cmd", "value": "cursor" },
-        "38": { "type": "cmd", "value": "git status" },
-        "39": { "type": "cmd", "value": "docker ps" },
-        "51": { "type": "hud", "value": "toggle" },
-        "52": { "type": "profile", "value": "ai" },
-        "53": { "type": "profile", "value": "stream" },
-        "67": { "type": "hud", "value": "toggle" },
-        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
-        "69": { "type": "focus_or_launch", "process": "claude", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"" },
-        "70": { "type": "focus_or_launch", "process": "grok", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"" },
-        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
-        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
-        "81": { "type": "profile", "value": "dev" },
-        "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "hud", "value": "toggle" }
+        "36": {
+          "type": "cmd",
+          "value": "powershell"
+        },
+        "37": {
+          "type": "cmd",
+          "value": "cursor"
+        },
+        "38": {
+          "type": "cmd",
+          "value": "git status"
+        },
+        "39": {
+          "type": "cmd",
+          "value": "docker ps"
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "53": {
+          "type": "profile",
+          "value": "stream"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "start chatgpt"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "start stabilitymatrix"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
       },
       "knobs": {
-        "1": { "type": "log", "value": "Dev knob 1 moved" },
-        "2": { "type": "cmd", "value": "echo DEV_KNOB_2" },
-        "3": { "type": "volume_step", "value": "1" },
-        "4": { "type": "noop", "value": "" }
+        "1": {
+          "type": "log",
+          "value": "Dev knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo DEV_KNOB_2"
+        },
+        "3": {
+          "type": "volume_step",
+          "value": "1"
+        },
+        "4": {
+          "type": "noop",
+          "value": ""
+        }
       }
     },
     "ai": {
       "pads": {
-        "36": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
-        "37": { "type": "focus_or_launch", "process": "claude", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"" },
-        "38": { "type": "focus_or_launch", "process": "grok", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"" },
-        "39": { "type": "cmd", "value": "cursor" },
-        "40": { "type": "focus_or_launch", "process": "chrome", "command": "start chrome https://gemini.google.com/" },
-        "41": { "type": "cmd", "value": "start stabilitymatrix" },
-        "51": { "type": "hud", "value": "toggle" },
-        "52": { "type": "profile", "value": "dev" },
-        "53": { "type": "profile", "value": "stream" },
-        "67": { "type": "hud", "value": "toggle" },
-        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
-        "69": { "type": "focus_or_launch", "process": "claude", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"" },
-        "70": { "type": "focus_or_launch", "process": "grok", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"" },
-        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
-        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
-        "81": { "type": "profile", "value": "dev" },
-        "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "hud", "value": "toggle" }
+        "36": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "start chatgpt"
+        },
+        "37": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+        },
+        "38": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+        },
+        "39": {
+          "type": "cmd",
+          "value": "cursor"
+        },
+        "40": {
+          "type": "focus_or_launch",
+          "process": "chrome",
+          "command": "start chrome https://gemini.google.com/"
+        },
+        "41": {
+          "type": "cmd",
+          "value": "start stabilitymatrix"
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "53": {
+          "type": "profile",
+          "value": "stream"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "start chatgpt"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "start stabilitymatrix"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
       },
       "knobs": {
-        "1": { "type": "log", "value": "AI knob 1 moved" },
-        "2": { "type": "cmd", "value": "echo AI_KNOB_2" },
-        "3": { "type": "noop", "value": "" }
+        "1": {
+          "type": "log",
+          "value": "AI knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo AI_KNOB_2"
+        },
+        "3": {
+          "type": "noop",
+          "value": ""
+        }
       }
     },
     "stream": {
       "pads": {
-        "36": { "type": "cmd", "value": "obs64" },
-        "37": { "type": "cmd", "value": "discord" },
-        "38": { "type": "cmd", "value": "spotify" },
-        "51": { "type": "hud", "value": "toggle" },
-        "52": { "type": "profile", "value": "dev" },
-        "53": { "type": "profile", "value": "ai" },
-        "67": { "type": "hud", "value": "toggle" },
-        "68": { "type": "focus_or_launch", "process": "chatgpt", "command": "start chatgpt" },
-        "69": { "type": "focus_or_launch", "process": "claude", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"" },
-        "70": { "type": "focus_or_launch", "process": "grok", "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"" },
-        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
-        "72": { "type": "focus_or_launch", "process": "stabilitymatrix", "command": "start stabilitymatrix" },
-        "81": { "type": "profile", "value": "dev" },
-        "82": { "type": "profile", "value": "ai" },
-        "83": { "type": "hud", "value": "toggle" }
+        "36": {
+          "type": "cmd",
+          "value": "obs64"
+        },
+        "37": {
+          "type": "cmd",
+          "value": "discord"
+        },
+        "38": {
+          "type": "cmd",
+          "value": "spotify"
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "53": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "start chatgpt"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "start stabilitymatrix"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
       },
       "knobs": {
-        "1": { "type": "log", "value": "Stream knob 1 moved" },
-        "2": { "type": "cmd", "value": "echo STREAM_KNOB_2" },
-        "3": { "type": "noop", "value": "" }
+        "1": {
+          "type": "log",
+          "value": "Stream knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo STREAM_KNOB_2"
+        },
+        "3": {
+          "type": "noop",
+          "value": ""
+        }
+      }
+    },
+    "legacy_linux": {
+      "pads": {
+        "36": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "37": {
+          "type": "url",
+          "value": "https://test.argentinatransfers.com/?search=Mace%20Phillips"
+        },
+        "38": {
+          "type": "url",
+          "value": "https://gitlab.com"
+        },
+        "39": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "40": {
+          "type": "cmd",
+          "value": "xdg-open \"/home/masterp/Sacred\""
+        },
+        "41": {
+          "type": "cmd",
+          "value": "xdg-open \"/www/tickets\""
+        },
+        "42": {
+          "type": "focus_or_launch",
+          "process": "tilix",
+          "command": "tilix"
+        },
+        "43": {
+          "type": "focus_or_launch",
+          "process": "phpstorm",
+          "command": "/home/masterp/.local/share/JetBrains/Toolbox/scripts/phpstorm"
+        },
+        "44": {
+          "type": "cmd",
+          "value": "xdg-open \"/www/tickets\""
+        },
+        "45": {
+          "type": "focus_or_launch",
+          "process": "signal-desktop",
+          "command": "signal-desktop"
+        },
+        "46": {
+          "type": "focus_or_launch",
+          "process": "slack",
+          "command": "slack"
+        },
+        "47": {
+          "type": "focus_or_launch",
+          "process": "cursor-1.4.5-x86_64",
+          "command": "/home/masterp/Applications/Cursor-1.4.5-x86_64.AppImage"
+        },
+        "48": {
+          "type": "focus_or_launch",
+          "process": "chatgpt-desktop-client",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "49": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+        },
+        "50": {
+          "type": "focus_or_launch",
+          "process": "launch-pygpt.sh",
+          "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "51": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "52": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "53": {
+          "type": "url",
+          "value": "https://test.argentinatransfers.com/?search=Mace%20Phillips"
+        },
+        "54": {
+          "type": "cmd",
+          "value": "xdotool type --delay 1 -- \"console.log();\""
+        },
+        "55": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "56": {
+          "type": "cmd",
+          "value": "xdg-open \"/home/masterp/Sacred\""
+        },
+        "57": {
+          "type": "cmd",
+          "value": "xdg-open \"/www/tickets\""
+        },
+        "58": {
+          "type": "focus_or_launch",
+          "process": "tilix",
+          "command": "tilix"
+        },
+        "59": {
+          "type": "cmd",
+          "value": "xdotool key alt+tab"
+        },
+        "60": {
+          "type": "cmd",
+          "value": "xdotool key ctrl+z"
+        },
+        "61": {
+          "type": "cmd",
+          "value": "pactl set-sink-volume @DEFAULT_SINK@ -5%"
+        },
+        "62": {
+          "type": "cmd",
+          "value": "pactl set-sink-volume @DEFAULT_SINK@ +5%"
+        },
+        "63": {
+          "type": "cmd",
+          "value": "playerctl play-pause"
+        },
+        "64": {
+          "type": "cmd",
+          "value": "xdotool type --delay 1 -- \"Channel B Text\""
+        },
+        "65": {
+          "type": "cmd",
+          "value": "xdotool key ctrl+t"
+        },
+        "66": {
+          "type": "focus_or_launch",
+          "process": "pygpt",
+          "command": "pygpt"
+        },
+        "67": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "69": {
+          "type": "url",
+          "value": "https://test.argentinatransfers.com/?search=Mace%20Phillips"
+        },
+        "70": {
+          "type": "url",
+          "value": "https://gitlab.com"
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "firefox",
+          "command": "firefox"
+        },
+        "72": {
+          "type": "cmd",
+          "value": "xdg-open \"/home/masterp/Sacred\""
+        },
+        "73": {
+          "type": "cmd",
+          "value": "xdg-open \"/www/tickets\""
+        },
+        "74": {
+          "type": "focus_or_launch",
+          "process": "tilix",
+          "command": "tilix"
+        },
+        "75": {
+          "type": "focus_or_launch",
+          "process": "phpstorm",
+          "command": "phpstorm"
+        },
+        "76": {
+          "type": "cmd",
+          "value": "xdg-open \"/www/tickets\""
+        },
+        "77": {
+          "type": "focus_or_launch",
+          "process": "signal-desktop",
+          "command": "signal-desktop"
+        },
+        "78": {
+          "type": "focus_or_launch",
+          "process": "slack",
+          "command": "slack"
+        },
+        "79": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "80": {
+          "type": "focus_or_launch",
+          "process": "chatgpt-desktop-client",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
+      },
+      "knobs": {}
+    },
+    "dev_linux": {
+      "pads": {
+        "36": {
+          "type": "cmd",
+          "value": "tilix"
+        },
+        "37": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "38": {
+          "type": "cmd",
+          "value": "tilix -e \"bash -lc 'git -C /media/masterp/AI-Models/mpd-streamdeck status; exec bash'\""
+        },
+        "39": {
+          "type": "cmd",
+          "value": "tilix -e \"bash -lc 'docker ps; exec bash'\""
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "ai_linux"
+        },
+        "53": {
+          "type": "profile",
+          "value": "stream_linux"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "stability",
+          "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev_linux"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai_linux"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
+      },
+      "knobs": {
+        "1": {
+          "type": "log",
+          "value": "Dev knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo DEV_KNOB_2"
+        },
+        "3": {
+          "type": "volume_step",
+          "value": "1"
+        },
+        "4": {
+          "type": "noop",
+          "value": ""
+        }
+      }
+    },
+    "ai_linux": {
+      "pads": {
+        "36": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "37": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "38": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+        },
+        "39": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "40": {
+          "type": "focus_or_launch",
+          "process": "chrome",
+          "command": "google-chrome https://gemini.google.com/"
+        },
+        "41": {
+          "type": "focus_or_launch",
+          "process": "pygpt",
+          "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "dev_linux"
+        },
+        "53": {
+          "type": "profile",
+          "value": "stream_linux"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "pygpt",
+          "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev_linux"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai_linux"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
+      },
+      "knobs": {
+        "1": {
+          "type": "log",
+          "value": "AI knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo AI_KNOB_2"
+        },
+        "3": {
+          "type": "noop",
+          "value": ""
+        }
+      }
+    },
+    "stream_linux": {
+      "pads": {
+        "36": {
+          "type": "focus_or_launch",
+          "process": "obs",
+          "command": "obs"
+        },
+        "37": {
+          "type": "focus_or_launch",
+          "process": "discord",
+          "command": "discord"
+        },
+        "38": {
+          "type": "focus_or_launch",
+          "process": "spotify",
+          "command": "spotify"
+        },
+        "51": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "52": {
+          "type": "profile",
+          "value": "dev_linux"
+        },
+        "53": {
+          "type": "profile",
+          "value": "ai_linux"
+        },
+        "67": {
+          "type": "hud",
+          "value": "toggle"
+        },
+        "68": {
+          "type": "focus_or_launch",
+          "process": "chatgpt",
+          "command": "/snap/bin/chatgpt-desktop-client"
+        },
+        "69": {
+          "type": "focus_or_launch",
+          "process": "claude",
+          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+        },
+        "70": {
+          "type": "focus_or_launch",
+          "process": "grok",
+          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+        },
+        "71": {
+          "type": "focus_or_launch",
+          "process": "cursor",
+          "command": "cursor"
+        },
+        "72": {
+          "type": "focus_or_launch",
+          "process": "pygpt",
+          "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "81": {
+          "type": "profile",
+          "value": "dev_linux"
+        },
+        "82": {
+          "type": "profile",
+          "value": "ai_linux"
+        },
+        "83": {
+          "type": "hud",
+          "value": "toggle"
+        }
+      },
+      "knobs": {
+        "1": {
+          "type": "log",
+          "value": "Stream knob 1 moved"
+        },
+        "2": {
+          "type": "cmd",
+          "value": "echo STREAM_KNOB_2"
+        },
+        "3": {
+          "type": "noop",
+          "value": ""
+        }
       }
     }
   }
