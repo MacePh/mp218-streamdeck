@@ -1,6 +1,6 @@
 # mp218-streamdeck
 
-Config-driven Akai MPD218 control surface for Windows, built with Python.
+Config-driven Akai MPD218 control surface for Windows and Linux, built with Python.
 
 This project turns an MPD218 into a profile-aware macro controller with LED feedback, knob actions, hot reload, and automatic profile switching based on the active foreground app.
 
@@ -48,7 +48,7 @@ mpd-streamdeck/
 
 ## Requirements
 
-- Windows 10/11
+- Windows 10/11 or Linux
 - Python 3.10+
 - Akai MPD218
 - MPD218 pads configured on MIDI channel 10 (project uses `pad_channel: 9` because `mido` is 0-indexed)
@@ -79,6 +79,12 @@ Direct:
 ```powershell
 python controller.py --config config.json
 ```
+
+## Quick Start / Restart
+
+Use `RUNME.md` for copy/paste day-to-day commands (start, restart, status, logs) on both Linux and Windows:
+
+- `RUNME.md`
 
 ## How It Works
 

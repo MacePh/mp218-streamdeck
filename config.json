@@ -114,17 +114,20 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt"
+          "command": "start chatgpt",
+          "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
           "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "window_title": "Grok"
         },
         "71": {
           "type": "focus_or_launch",
@@ -173,17 +176,20 @@
         "36": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt"
+          "command": "start chatgpt",
+          "window_title": "ChatGPT"
         },
         "37": {
           "type": "focus_or_launch",
           "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "window_title": "Claude"
         },
         "38": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "window_title": "Grok"
         },
         "39": {
           "type": "cmd",
@@ -217,17 +223,20 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt"
+          "command": "start chatgpt",
+          "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
           "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "window_title": "Grok"
         },
         "71": {
           "type": "focus_or_launch",
@@ -300,17 +309,20 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt"
+          "command": "start chatgpt",
+          "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
           "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\""
+          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "window_title": "Grok"
         },
         "71": {
           "type": "focus_or_launch",
