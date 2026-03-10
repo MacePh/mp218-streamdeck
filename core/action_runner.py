@@ -63,7 +63,6 @@ class ActionRunner:
                 return False
             target_hwnd = matched_windows[0]
             try:
-                # Restore minimized windows before foreground focus attempt.
                 win32gui.ShowWindow(target_hwnd, 9)  # SW_RESTORE
             except Exception:
                 pass
@@ -71,6 +70,29 @@ class ActionRunner:
             return True
         except Exception:
             return False
+
+    def _parse_step(self, action_value: Any, cc_value: int) -> int:
+        """
+        Derive a signed step from the knob CC value.
+        MIDI knobs typically send relative values:
+          Values 1-63   -> clockwise  (positive step)
+          Values 65-127 -> counter-clockwise (negative step)
+          Value  64     -> centre / no movement
+        If action 'value' is a non-zero int it overrides the magnitude.
+        """
+        raw = str(action_value).strip()
+        if raw and raw not in ("0", ""):
+            try:
+                magnitude = abs(int(raw))
+            except ValueError:
+                magnitude = 1
+        else:
+            magnitude = 1
+
+        if cc_value == 64:
+            return 0
+        direction = 1 if cc_value < 64 else -1
+        return direction * magnitude
 
     def _run(self, action: dict[str, Any], source: str, value: int) -> bool:
         action_type = action.get("type", "noop")
@@ -107,9 +129,6 @@ class ActionRunner:
                     if self._focus_window_by_pid(matched_pid):
                         return False
                     self._log(f"[action] failed to focus process {process_substring}")
-                    self._log(f"[action] launching process {process_substring}")
-                    platform_utils.run_command(launch_command)
-                    return False
 
                 self._log(f"[action] launching process {process_substring}")
                 platform_utils.run_command(launch_command)
@@ -132,13 +151,57 @@ class ActionRunner:
                 self._log(f"[action] toggled flag {flag_name} -> {int(new_value)}")
                 return False
 
-            if action_type == "volume_step":
-                step = int(action_value) if str(action_value).strip() else 1
-                platform_utils.volume_step_placeholder(step)
+            # ── Knob actions ─────────────────────────────────────────────────
+
+            if action_type in ("volume_step", "volume"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.volume_step(step)
+                return False
+
+            if action_type in ("brightness", "brightness_step"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.brightness_step(step)
+                return False
+
+            if action_type in ("scroll", "scroll_vertical"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.scroll_vertical(step)
+                return False
+
+            if action_type in ("media_step", "media_seek"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.media_step(step)
+                return False
+
+            if action_type in ("tab_step", "tab_switch"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.tab_step(step)
+                return False
+
+            if action_type == "playback_speed":
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.playback_speed_step(step)
+                return False
+
+            if action_type in ("zoom_step", "zoom"):
+                step = self._parse_step(action_value, value)
+                if step != 0:
+                    platform_utils.zoom_step(step)
+                return False
+
+            if action_type == "media_play_pause":
+                platform_utils.media_play_pause()
                 return False
 
             self._log(f"[action] unknown type='{action_type}'")
             return False
+
         except Exception as exc:
             self._log(f"[action/error] source={source} error={exc}")
             return False
