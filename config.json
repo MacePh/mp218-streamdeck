@@ -114,19 +114,19 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
           "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
           "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
           "window_title": "Grok"
         },
         "71": {
@@ -176,19 +176,19 @@
         "36": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
           "window_title": "ChatGPT"
         },
         "37": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
           "window_title": "Claude"
         },
         "38": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
           "window_title": "Grok"
         },
         "39": {
@@ -223,19 +223,19 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
           "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
           "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
           "window_title": "Grok"
         },
         "71": {
@@ -309,19 +309,19 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "start chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
           "window_title": "ChatGPT"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\app-1.1.5368\\claude.exe\"",
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
           "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "start \"\" \"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
           "window_title": "Grok"
         },
         "71": {
@@ -421,13 +421,13 @@
         },
         "48": {
           "type": "focus_or_launch",
-          "process": "chatgpt-desktop-client",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "process": "chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "49": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox"
         },
         "50": {
           "type": "focus_or_launch",
@@ -436,8 +436,9 @@
         },
         "51": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "52": {
           "type": "focus_or_launch",
@@ -505,8 +506,9 @@
         },
         "67": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "68": {
           "type": "focus_or_launch",
@@ -565,8 +567,8 @@
         },
         "80": {
           "type": "focus_or_launch",
-          "process": "chatgpt-desktop-client",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "process": "chatgpt",
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "81": {
           "type": "profile",
@@ -621,17 +623,18 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox"
         },
         "71": {
           "type": "focus_or_launch",
@@ -680,17 +683,18 @@
         "36": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "37": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "38": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox"
         },
         "39": {
           "type": "focus_or_launch",
@@ -726,17 +730,18 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox"
         },
         "71": {
           "type": "focus_or_launch",
@@ -812,17 +817,18 @@
         "68": {
           "type": "focus_or_launch",
           "process": "chatgpt",
-          "command": "/snap/bin/chatgpt-desktop-client"
+          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
         },
         "69": {
           "type": "focus_or_launch",
-          "process": "claude",
-          "command": "/home/masterp/Applications/Claude-linux-x64/Claude"
+          "process": "chrome",
+          "command": "google-chrome --new-window https://claude.ai/",
+          "window_title": "Claude"
         },
         "70": {
           "type": "focus_or_launch",
           "process": "grok",
-          "command": "/home/masterp/Applications/Grok-linux-x64/Grok"
+          "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox"
         },
         "71": {
           "type": "focus_or_launch",
