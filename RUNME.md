@@ -44,6 +44,13 @@ systemctl --user disable --now mpd-streamdeck.service
 
 Run from project root (`mpd-streamdeck`).
 
+### IMPORTANT: Dictation dependency install (Windows)
+If you use the `dictate` action type, install optional dependencies first:
+```powershell
+python -m pip install -r requirements.txt
+```
+Without this, push-to-talk dictation will not start.
+
 ### Start now (preferred)
 ```powershell
 .\run.ps1

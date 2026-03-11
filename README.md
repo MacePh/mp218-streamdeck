@@ -53,18 +53,28 @@ mpd-streamdeck/
 - Akai MPD218
 - MPD218 pads configured on MIDI channel 10 (project uses `pad_channel: 9` because `mido` is 0-indexed)
 
-Python packages:
+Core Python packages:
 
 - `mido`
 - `python-rtmidi`
 - `psutil`
 - `pywin32`
 
-Install in your venv:
+Optional packages for push-to-talk dictation (`type: "dictate"`):
+
+- `faster-whisper`
+- `sounddevice`
+- `soundfile`
+- `pyperclip` (Windows clipboard paste)
+- `pyautogui` (Windows key injection)
+
+Install:
 
 ```powershell
-python -m pip install mido python-rtmidi psutil pywin32
+python -m pip install -r requirements.txt
 ```
+
+`faster-whisper` downloads the selected model on first use, then runs local transcription from cache.
 
 ## Run
 
@@ -80,6 +90,21 @@ Direct:
 python controller.py --config config.json
 ```
 
+### Linux service runtime (dictation-enabled)
+
+Use the user service with host Python so installed dictation dependencies are available:
+
+```ini
+ExecStart=/usr/bin/python3 /media/masterp/AI-Models/mpd-streamdeck/controller.py --config /media/masterp/AI-Models/mpd-streamdeck/config.json
+```
+
+After editing the service:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user restart mpd-streamdeck.service
+```
+
 ## Quick Start / Restart
 
 Use `RUNME.md` for copy/paste day-to-day commands (start, restart, status, logs) on both Linux and Windows:
@@ -90,7 +115,8 @@ Use `RUNME.md` for copy/paste day-to-day commands (start, restart, status, logs)
 
 - The app opens MIDI input/output ports.
 - It polls incoming MIDI events:
-  - `note_on` -> pad actions
+  - `note_on` -> pad press actions
+  - `note_off` (and `note_on` with velocity `0`) -> pad release actions (`dictate`)
   - `control_change` -> knob actions
 - It renders LEDs for the active profile.
 - It polls `config.json` for changes and hot-reloads safely.
@@ -103,6 +129,7 @@ Supported action types in pad/knob mappings:
 - `cmd` - execute shell command
 - `url` - open URL in browser
 - `focus_or_launch` - focus running app window or launch it if not running
+- `dictate` - hold pad to record microphone input, release to transcribe and type at cursor
 - `profile` - switch active profile
 - `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
 - `hud` - toggle the HUD overlay
@@ -235,6 +262,9 @@ If an app command is not in PATH, replace with full executable path.
 
 - `ModuleNotFoundError: psutil`  
   Install context deps: `python -m pip install psutil pywin32`
+
+- Dictation logs `missing dependencies: sounddevice/soundfile/numpy`  
+  Install dictation deps: `python -m pip install -r requirements.txt`
 
 - MIDI ports fail to open  
   Check available port names and adjust `midi.input_port`/`output_port`, or keep auto-detect enabled.

@@ -1,0 +1,6 @@
+# Optional - required only for 'dictate' action type (push-to-talk transcription)
+faster-whisper
+sounddevice
+soundfile
+pyperclip
+pyautogui

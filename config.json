@@ -1,5 +1,12 @@
 {
   "config_version": 1,
+  "action_type_examples": {
+    "dictate": {
+      "type": "dictate",
+      "model": "base.en",
+      "language": "en"
+    }
+  },
   "midi": {
     "input_port": "MPD218 0",
     "output_port": "MPD218 1",
@@ -643,8 +650,22 @@
         },
         "72": {
           "type": "focus_or_launch",
-          "process": "stability",
+          "process": "pygpt",
           "command": "/mnt/ai-models/software/launch-pygpt.sh"
+        },
+        "73": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+        },
+        "74": {
+          "type": "cmd",
+          "value": "env PYTHONPATH=\"/home/masterp/Apps/mpd218-controller/whisper-venv/lib/python3.12/site-packages\" /home/masterp/Apps/mpd218-controller/whisper-venv/bin/python /home/masterp/Apps/mpd218-controller/speech-to-text/transcribe.py"
+        },
+        "75": {
+          "type": "dictate",
+          "model": "base.en",
+          "language": "en"
         },
         "81": {
           "type": "profile",
@@ -764,6 +785,15 @@
         "83": {
           "type": "hud",
           "value": "toggle"
+        },
+        "73": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+        },
+        "74": {
+          "type": "cmd",
+          "value": "env PYTHONPATH=\"/home/masterp/Apps/mpd218-controller/whisper-venv/lib/python3.12/site-packages\" /home/masterp/Apps/mpd218-controller/whisper-venv/bin/python /home/masterp/Apps/mpd218-controller/speech-to-text/transcribe.py"
         }
       },
       "knobs": {
@@ -851,6 +881,15 @@
         "83": {
           "type": "hud",
           "value": "toggle"
+        },
+        "73": {
+          "type": "focus_or_launch",
+          "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+        },
+        "74": {
+          "type": "cmd",
+          "value": "env PYTHONPATH=\"/home/masterp/Apps/mpd218-controller/whisper-venv/lib/python3.12/site-packages\" /home/masterp/Apps/mpd218-controller/whisper-venv/bin/python /home/masterp/Apps/mpd218-controller/speech-to-text/transcribe.py"
         }
       },
       "knobs": {

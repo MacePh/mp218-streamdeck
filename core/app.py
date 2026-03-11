@@ -222,6 +222,15 @@ class ControlSurfaceApp:
         )
         self.refresh_hud()
 
+    def handle_pad_release(self, note: int, channel: int) -> None:
+        assert self.profile_manager is not None
+        assert self.action_runner is not None
+
+        action = self.profile_manager.get_pad_action(note)
+        if action.get("type") == "dictate":
+            self.log(f"[pad] release note={note} type=dictate")
+            self.action_runner.on_dictate_release(note)
+
     def handle_knob_change(self, cc: int, value: int, channel: int) -> None:
         assert self.profile_manager is not None
         assert self.action_runner is not None
@@ -340,6 +349,13 @@ class ControlSurfaceApp:
                     if msg.type == "note_on" and msg.velocity > 0 and msg.channel == pad_channel:
                         if pad_min <= msg.note <= pad_max:
                             self.handle_pad_press(msg.note, msg.velocity, msg.channel)
+                        continue
+                    elif (
+                        (msg.type == "note_off" or (msg.type == "note_on" and msg.velocity == 0))
+                        and msg.channel == pad_channel
+                    ):
+                        if pad_min <= msg.note <= pad_max:
+                            self.handle_pad_release(msg.note, msg.channel)
                         continue
 
                     if msg.type == "control_change" and msg.channel == pad_channel:

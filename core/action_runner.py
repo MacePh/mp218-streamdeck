@@ -7,6 +7,11 @@ from core import platform_utils
 import psutil
 
 try:
+    from core.dictation_service import DictationService
+except Exception:
+    DictationService = None
+
+try:
     import win32gui
     import win32process
     import win32con
@@ -28,6 +33,10 @@ class ActionRunner:
         self._log = logger
         self.on_profile_change = on_profile_change
         self.on_toggle_flag = on_toggle_flag
+        self._dictation_sessions: dict[str, Any] = {}  # note source -> active session handle
+        self._dictation_service = (
+            DictationService(logger=self._log) if DictationService else None
+        )
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
         return self._run(action, source=f"pad:{note}", value=velocity)
@@ -35,27 +44,40 @@ class ActionRunner:
     def run_knob_action(self, action: dict[str, Any], cc: int, cc_value: int) -> bool:
         return self._run(action, source=f"knob:{cc}", value=cc_value)
 
+    def on_dictate_release(self, note: int) -> None:
+        source = f"pad:{note}"
+        session = self._dictation_sessions.pop(source, None)
+        if session is None:
+            self._log(f"[action] dictate release: no active session for {source}")
+            return
+        if self._dictation_service is None:
+            return
+        self._log(f"[action] dictate stop + transcribe {source}")
+        self._dictation_service.stop_and_transcribe(session)
+
     # ── Process discovery ──────────────────────────────────────────────────────
 
     def _find_process_pid(self, process_substring: str) -> Optional[int]:
         lowered = process_substring.lower()
-        for process in psutil.process_iter(attrs=["pid", "name"]):
+        for process in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
             try:
                 name = (process.info.get("name") or "").lower()
-                if lowered in name:
+                cmdline = " ".join(process.info.get("cmdline") or []).lower()
+                if lowered in name or lowered in cmdline:
                     return int(process.info["pid"])
             except Exception:
                 continue
         return None
 
     def _find_all_pids_for_process(self, process_substring: str) -> list[int]:
-        """Return all PIDs whose process name contains the substring."""
+        """Return all PIDs whose process name OR cmdline contains the substring."""
         lowered = process_substring.lower()
         pids = []
-        for process in psutil.process_iter(attrs=["pid", "name"]):
+        for process in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
             try:
                 name = (process.info.get("name") or "").lower()
-                if lowered in name:
+                cmdline = " ".join(process.info.get("cmdline") or []).lower()
+                if lowered in name or lowered in cmdline:
                     pids.append(int(process.info["pid"]))
             except Exception:
                 continue
@@ -183,6 +205,218 @@ class ActionRunner:
         except Exception:
             return False
 
+    def _collect_windows_for_pids(self, pids: list[int]) -> list[tuple[str, str]]:
+        """
+        Return (window_id_str, title) for every visible titled window
+        belonging to any PID in `pids`.
+        Platform-gated: Windows uses win32gui, Linux uses wmctrl/xdotool.
+        """
+        pid_set = {int(pid) for pid in pids}
+        if not pid_set:
+            return []
+
+        windows: list[tuple[str, str]] = []
+
+        if sys.platform == "win32":
+            if win32gui is None or win32process is None:
+                return []
+
+            def _cb(hwnd: int, _extra: Any) -> bool:
+                try:
+                    if not win32gui.IsWindowVisible(hwnd):
+                        return True
+                    _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
+                    if window_pid not in pid_set:
+                        return True
+                    title = (win32gui.GetWindowText(hwnd) or "").strip()
+                    if title:
+                        windows.append((str(hwnd), title))
+                except Exception:
+                    pass
+                return True
+
+            try:
+                win32gui.EnumWindows(_cb, None)
+            except Exception:
+                return []
+            return windows
+
+        try:
+            result = subprocess.run(
+                ["wmctrl", "-l", "-p"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+            )
+            if result.returncode == 0:
+                for line in result.stdout.splitlines():
+                    parts = line.split(None, 4)
+                    if len(parts) < 5:
+                        continue
+                    try:
+                        window_pid = int(parts[2])
+                    except ValueError:
+                        continue
+                    if window_pid not in pid_set:
+                        continue
+                    title = (parts[4] or "").strip()
+                    if not title:
+                        continue
+                    windows.append((parts[0], title))
+                return windows
+        except FileNotFoundError:
+            pass
+        except Exception:
+            return windows
+
+        for pid in pid_set:
+            try:
+                result = subprocess.run(
+                    ["xdotool", "search", "--pid", str(pid)],
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
+                )
+            except Exception:
+                continue
+            if result.returncode != 0:
+                continue
+
+            for wid in result.stdout.strip().splitlines():
+                if not wid:
+                    continue
+                try:
+                    name_result = subprocess.run(
+                        ["xdotool", "getwindowname", wid],
+                        capture_output=True,
+                        text=True,
+                        timeout=3,
+                    )
+                except Exception:
+                    continue
+                if name_result.returncode != 0:
+                    continue
+                title = (name_result.stdout or "").strip()
+                if title:
+                    windows.append((wid, title))
+
+        return windows
+
+    def _show_window_picker(self, windows: list[tuple[str, str]]) -> str | None:
+        """
+        Show a blocking Tk popup listing window titles.
+        Returns the selected window_id_str, or None on cancel/error.
+        """
+        try:
+            import tkinter as tk
+
+            selected_window_id: str | None = None
+            root = tk.Tk()
+            root.configure(bg="#111214")
+            root.overrideredirect(True)
+            root.attributes("-topmost", True)
+
+            container = tk.Frame(root, bg="#111214", padx=12, pady=10)
+            container.pack(fill="both", expand=True)
+
+            title_label = tk.Label(
+                container,
+                text="Select Window",
+                bg="#111214",
+                fg="#EFEFEF",
+                anchor="w",
+            )
+            title_label.pack(fill="x")
+
+            listbox = tk.Listbox(
+                container,
+                bg="#111214",
+                fg="#EFEFEF",
+                selectbackground="#2A2D33",
+                selectforeground="#EFEFEF",
+                highlightthickness=1,
+                highlightbackground="#2A2D33",
+                activestyle="none",
+                relief="flat",
+            )
+            for _wid, title in windows:
+                listbox.insert("end", title)
+            listbox.pack(fill="both", expand=True, pady=(8, 0))
+
+            if windows:
+                listbox.selection_set(0)
+                listbox.activate(0)
+
+            def _confirm(_event: Any = None) -> None:
+                nonlocal selected_window_id
+                selection = listbox.curselection()
+                if not selection:
+                    return
+                selected_window_id = windows[selection[0]][0]
+                root.destroy()
+
+            def _cancel(_event: Any = None) -> None:
+                nonlocal selected_window_id
+                selected_window_id = None
+                root.destroy()
+
+            listbox.bind("<Double-Button-1>", _confirm)
+            listbox.bind("<Return>", _confirm)
+            listbox.bind("<Escape>", _cancel)
+            root.bind("<Escape>", _cancel)
+            root.bind("<Return>", _confirm)
+
+            root.update_idletasks()
+            width = 560
+            row_count = max(1, min(len(windows), 12))
+            height = 92 + (row_count * 24)
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            x = max(0, (screen_width - width) // 2)
+            y = max(0, (screen_height - height) // 2)
+            root.geometry(f"{width}x{height}+{x}+{y}")
+
+            root.grab_set()
+            listbox.focus_set()
+            root.wait_window()
+            return selected_window_id
+        except Exception:
+            return None
+
+    def _focus_window_by_id(self, window_id_str: str) -> bool:
+        """Focus a window by its platform-specific ID string."""
+        if sys.platform == "win32":
+            if win32gui is None:
+                return False
+            try:
+                self._force_foreground(int(window_id_str))
+                return True
+            except Exception:
+                return False
+
+        try:
+            result = subprocess.run(
+                ["wmctrl", "-i", "-a", window_id_str],
+                capture_output=True,
+                timeout=3,
+            )
+            if result.returncode == 0:
+                return True
+        except FileNotFoundError:
+            pass
+        except Exception:
+            return False
+
+        try:
+            result = subprocess.run(
+                ["xdotool", "windowactivate", "--sync", window_id_str],
+                capture_output=True,
+                timeout=3,
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
     def _force_foreground(self, hwnd: int) -> None:
         """Robustly bring a window to foreground, handling the Windows focus-lock."""
         try:
@@ -234,6 +468,21 @@ class ActionRunner:
                 platform_utils.run_command(str(action_value))
                 return False
 
+            if action_type == "dictate":
+                if self._dictation_service is None:
+                    self._log("[action/warn] dictate: DictationService unavailable")
+                    return False
+                model = str(action.get("model", "base.en"))
+                language = str(action.get("language", "en"))
+                self._log(f"[action] dictate start note={source} model={model}")
+                session = self._dictation_service.start_recording(
+                    model=model,
+                    language=language,
+                )
+                if session is not None:
+                    self._dictation_sessions[source] = session
+                return False
+
             if action_type == "focus_or_launch":
                 process_substring = str(action.get("process", "")).strip().lower()
                 window_title = str(action.get("window_title", "")).strip()
@@ -261,10 +510,22 @@ class ActionRunner:
                 all_pids = self._find_all_pids_for_process(process_substring)
                 if all_pids:
                     self._log(f"[action] found {len(all_pids)} pid(s) for '{process_substring}'")
-                    for pid in all_pids:
-                        if self._focus_window_by_pid(pid):
+                    windows = self._collect_windows_for_pids(all_pids)
+                    self._log(f"[action] found {len(windows)} window(s) for '{process_substring}'")
+
+                    if len(windows) == 1:
+                        self._focus_window_by_id(windows[0][0])
+                        return False
+
+                    if len(windows) > 1:
+                        chosen_id = self._show_window_picker(windows)
+                        if chosen_id is not None:
+                            self._focus_window_by_id(chosen_id)
                             return False
-                    self._log(f"[action] could not focus any window for '{process_substring}', launching")
+                        self._log(f"[action] window picker cancelled for '{process_substring}'")
+                        return False
+
+                    self._log(f"[action] no windows found for '{process_substring}', launching")
                     platform_utils.run_command(launch_command)
                     return False
 

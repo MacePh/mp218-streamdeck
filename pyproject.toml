@@ -12,6 +12,12 @@ dependencies = [
     "mido",
     "python-rtmidi",
     "psutil",
+    "numpy",
+    "faster-whisper",
+    "sounddevice",
+    "soundfile",
+    "pyperclip; platform_system == 'Windows'",
+    "pyautogui; platform_system == 'Windows'",
     "pywin32; platform_system == 'Windows'",
 ]
 
