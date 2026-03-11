@@ -1,5 +1,7 @@
 from typing import Any, Callable
 from typing import Optional
+import subprocess
+import sys
 
 from core import platform_utils
 import psutil
@@ -33,6 +35,8 @@ class ActionRunner:
     def run_knob_action(self, action: dict[str, Any], cc: int, cc_value: int) -> bool:
         return self._run(action, source=f"knob:{cc}", value=cc_value)
 
+    # ── Process discovery ──────────────────────────────────────────────────────
+
     def _find_process_pid(self, process_substring: str) -> Optional[int]:
         lowered = process_substring.lower()
         for process in psutil.process_iter(attrs=["pid", "name"]):
@@ -57,12 +61,74 @@ class ActionRunner:
                 continue
         return pids
 
+    # ── Linux focus ───────────────────────────────────────────────────────────
+
+    def _focus_window_linux(self, pid: int) -> bool:
+        """
+        Focus a window on Linux using wmctrl (preferred) or xdotool (fallback).
+        Both tools can target windows by PID.
+        """
+        # Strategy 1: wmctrl -l -p lists all windows with PIDs
+        try:
+            result = subprocess.run(
+                ["wmctrl", "-l", "-p"],
+                capture_output=True, text=True, timeout=3
+            )
+            if result.returncode == 0:
+                for line in result.stdout.splitlines():
+                    parts = line.split(None, 4)
+                    # format: <wid> <desktop> <pid> <host> <title>
+                    if len(parts) >= 3:
+                        try:
+                            win_pid = int(parts[2])
+                        except ValueError:
+                            continue
+                        if win_pid == pid:
+                            wid = parts[0]
+                            self._log(f"[action] wmctrl focus wid={wid} pid={pid}")
+                            subprocess.run(
+                                ["wmctrl", "-i", "-a", wid],
+                                capture_output=True, timeout=3
+                            )
+                            return True
+        except FileNotFoundError:
+            self._log("[action] wmctrl not found, trying xdotool")
+        except Exception as e:
+            self._log(f"[action] wmctrl error: {e}")
+
+        # Strategy 2: xdotool search --pid then windowactivate
+        try:
+            result = subprocess.run(
+                ["xdotool", "search", "--pid", str(pid)],
+                capture_output=True, text=True, timeout=3
+            )
+            if result.returncode == 0:
+                wids = result.stdout.strip().splitlines()
+                if wids:
+                    # Use the last wid — for Electron apps the last one is usually
+                    # the main visible window (earlier ones are background frames)
+                    wid = wids[-1]
+                    self._log(f"[action] xdotool focus wid={wid} pid={pid}")
+                    subprocess.run(
+                        ["xdotool", "windowactivate", "--sync", wid],
+                        capture_output=True, timeout=3
+                    )
+                    return True
+        except FileNotFoundError:
+            self._log("[action] xdotool not found")
+        except Exception as e:
+            self._log(f"[action] xdotool error: {e}")
+
+        return False
+
+    # ── Windows focus ─────────────────────────────────────────────────────────
+
     def _find_window_by_title_substring(self, title_substring: str) -> Optional[int]:
         """Find a visible window whose title contains title_substring (case-insensitive)."""
         if win32gui is None:
             return None
         lowered = title_substring.lower()
-        matched: list[tuple[int, str]] = []  # (hwnd, title)
+        matched: list[tuple[int, str]] = []
 
         def _cb(hwnd: int, _extra: Any) -> bool:
             try:
@@ -78,16 +144,19 @@ class ActionRunner:
         win32gui.EnumWindows(_cb, None)
         if not matched:
             return None
-        # Prefer windows whose title starts with the substring
         matched.sort(key=lambda x: (0 if x[1].lower().startswith(lowered) else 1))
         return matched[0][0]
 
     def _focus_window_by_pid(self, pid: int) -> bool:
+        """Focus a window by PID — dispatches to Linux or Windows implementation."""
+        if sys.platform != "win32":
+            return self._focus_window_linux(pid)
+
         if win32gui is None or win32process is None:
             return False
 
-        titled_windows: list[int] = []   # visible windows with a non-empty title
-        untitled_windows: list[int] = [] # visible windows without a title
+        titled_windows: list[int] = []
+        untitled_windows: list[int] = []
 
         def collect_windows(hwnd: int, _extra: Any) -> bool:
             try:
@@ -106,14 +175,10 @@ class ActionRunner:
 
         try:
             win32gui.EnumWindows(collect_windows, None)
-
-            # Prefer titled windows — untitled handles are usually Electron internals
             candidates = titled_windows if titled_windows else untitled_windows
             if not candidates:
                 return False
-
-            target_hwnd = candidates[0]
-            self._force_foreground(target_hwnd)
+            self._force_foreground(candidates[0])
             return True
         except Exception:
             return False
@@ -123,12 +188,9 @@ class ActionRunner:
         try:
             import ctypes as _ctypes
 
-            # If minimized, restore first
             if win32gui.IsIconic(hwnd):
                 win32gui.ShowWindow(hwnd, 9)  # SW_RESTORE
 
-            # Attach our thread's input to the target window's thread so
-            # SetForegroundWindow is permitted even when another app owns focus.
             current_thread = _ctypes.windll.kernel32.GetCurrentThreadId()
             target_thread, _ = win32process.GetWindowThreadProcessId(hwnd)
 
@@ -140,11 +202,8 @@ class ActionRunner:
                     )
                 )
 
-            # Bring to front
             win32gui.BringWindowToTop(hwnd)
             win32gui.SetForegroundWindow(hwnd)
-
-            # Show normally in case it was obscured / behind
             win32gui.ShowWindow(hwnd, 5)  # SW_SHOW
 
             if attached:
@@ -153,6 +212,8 @@ class ActionRunner:
                 )
         except Exception as exc:
             self._log(f"[action] _force_foreground error: {exc}")
+
+    # ── Main dispatcher ───────────────────────────────────────────────────────
 
     def _run(self, action: dict[str, Any], source: str, value: int) -> bool:
         action_type = action.get("type", "noop")
@@ -185,26 +246,24 @@ class ActionRunner:
                     self._log("[action/error] focus_or_launch requires 'command'")
                     return False
 
-                # --- Strategy 1: match by window title (best for WebCatalog apps) ---
-                if window_title:
+                # Windows-only: title-based focus for WebCatalog apps
+                if window_title and sys.platform == "win32":
                     hwnd = self._find_window_by_title_substring(window_title)
                     if hwnd is not None:
                         self._log(f"[action] focus by window_title '{window_title}' hwnd={hwnd}")
                         self._force_foreground(hwnd)
                         return False
-                    # Title not found — fall through to launch
                     self._log(f"[action] window_title '{window_title}' not found, launching")
                     platform_utils.run_command(launch_command)
                     return False
 
-                # --- Strategy 2: match by process name, try ALL pids ---
+                # Process-based focus (Linux + Windows fallback)
                 all_pids = self._find_all_pids_for_process(process_substring)
                 if all_pids:
                     self._log(f"[action] found {len(all_pids)} pid(s) for '{process_substring}'")
                     for pid in all_pids:
                         if self._focus_window_by_pid(pid):
                             return False
-                    # Processes exist but no focusable window found — launch anyway
                     self._log(f"[action] could not focus any window for '{process_substring}', launching")
                     platform_utils.run_command(launch_command)
                     return False
