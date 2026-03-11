@@ -24,3 +24,5 @@ Thumbs.db
 
 # Build artifacts
 *.AppImage
+build/
+dist/
