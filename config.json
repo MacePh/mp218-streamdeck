@@ -573,9 +573,8 @@
           "command": "cursor"
         },
         "80": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
-          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
+          "type": "hold_double_click",
+          "rate_hz": 3
         },
         "81": {
           "type": "profile",
@@ -666,6 +665,10 @@
           "type": "dictate",
           "model": "base.en",
           "language": "en"
+        },
+        "80": {
+          "type": "hold_double_click",
+          "rate_hz": 3
         },
         "81": {
           "type": "profile",

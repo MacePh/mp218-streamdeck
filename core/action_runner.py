@@ -2,6 +2,7 @@ from typing import Any, Callable
 from typing import Optional
 import subprocess
 import sys
+import threading
 
 from core import platform_utils
 import psutil
@@ -37,6 +38,7 @@ class ActionRunner:
         self._dictation_service = (
             DictationService(logger=self._log) if DictationService else None
         )
+        self._hold_double_click_sessions: dict[str, threading.Event] = {}
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
         return self._run(action, source=f"pad:{note}", value=velocity)
@@ -54,6 +56,52 @@ class ActionRunner:
             return
         self._log(f"[action] dictate stop + transcribe {source}")
         self._dictation_service.stop_and_transcribe(session)
+
+    def _perform_double_click(self) -> None:
+        if sys.platform == "win32":
+            try:
+                import pyautogui
+                pyautogui.doubleClick()
+            except Exception as exc:
+                self._log(f"[action/error] hold_double_click win32: {exc}")
+            return
+
+        try:
+            subprocess.run(
+                ["xdotool", "click", "--repeat", "2", "--delay", "50", "1"],
+                capture_output=True,
+                timeout=2,
+            )
+        except Exception as exc:
+            self._log(f"[action/error] hold_double_click linux: {exc}")
+
+    def _start_hold_double_click(self, source: str, rate_hz: float) -> None:
+        if source in self._hold_double_click_sessions:
+            return
+
+        safe_rate = rate_hz if rate_hz > 0 else 3.0
+        interval_seconds = 1.0 / safe_rate
+        stop_event = threading.Event()
+        self._hold_double_click_sessions[source] = stop_event
+        self._log(f"[action] hold_double_click start {source} rate={safe_rate:.2f}Hz")
+
+        def _worker() -> None:
+            while not stop_event.is_set():
+                self._perform_double_click()
+                if stop_event.wait(interval_seconds):
+                    break
+
+        thread = threading.Thread(target=_worker, daemon=True)
+        thread.start()
+
+    def on_hold_double_click_release(self, note: int) -> None:
+        source = f"pad:{note}"
+        stop_event = self._hold_double_click_sessions.pop(source, None)
+        if stop_event is None:
+            self._log(f"[action] hold_double_click release: no active session for {source}")
+            return
+        stop_event.set()
+        self._log(f"[action] hold_double_click stop {source}")
 
     # ── Process discovery ──────────────────────────────────────────────────────
 
@@ -481,6 +529,11 @@ class ActionRunner:
                 )
                 if session is not None:
                     self._dictation_sessions[source] = session
+                return False
+
+            if action_type == "hold_double_click":
+                rate_hz = float(action.get("rate_hz", 3))
+                self._start_hold_double_click(source, rate_hz=rate_hz)
                 return False
 
             if action_type == "focus_or_launch":

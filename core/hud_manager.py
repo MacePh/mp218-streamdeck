@@ -195,6 +195,10 @@ class HUDManager:
 
         grid_frame = tk.Frame(frame, bg="#111214")
         grid_frame.pack(fill="both", expand=True)
+        for row in range(4):
+            grid_frame.grid_rowconfigure(row, weight=1, uniform="padrow", minsize=68)
+        for col in range(4):
+            grid_frame.grid_columnconfigure(col, weight=1, uniform="padcol")
         self.pad_buttons: list[tk.Button] = []
         for index in range(16):
             button = tk.Button(
@@ -213,8 +217,6 @@ class HUDManager:
             row = index // 4
             col = index % 4
             button.grid(row=row, column=col, sticky="nsew", padx=4, pady=4)
-            grid_frame.grid_rowconfigure(row, weight=1)
-            grid_frame.grid_columnconfigure(col, weight=1)
             self.pad_buttons.append(button)
 
         palette_frame = tk.Frame(frame, bg="#111214")
@@ -236,7 +238,7 @@ class HUDManager:
         search_entry.pack(fill="x", pady=(3, 4))
         self.result_list = tk.Listbox(
             palette_frame,
-            height=5,
+            height=4,
             bg="#17191D",
             fg="#DFDFDF",
             selectbackground="#2A3240",
@@ -344,6 +346,11 @@ class HUDManager:
     def _center_window(self) -> None:
         width = int(self._hud_config.get("width", 600))
         height = int(self._hud_config.get("height", 450))
+        self.root.update_idletasks()
+        requested_width = int(self.root.winfo_reqwidth())
+        requested_height = int(self.root.winfo_reqheight())
+        width = max(width, requested_width + 8)
+        height = max(height, requested_height + 8)
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
         x = int((screen_w - width) / 2)
