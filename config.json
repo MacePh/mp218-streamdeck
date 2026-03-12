@@ -735,6 +735,10 @@
           "process": "pygpt",
           "command": "/mnt/ai-models/software/launch-pygpt.sh"
         },
+        "44": {
+          "type": "transcribe_stream",
+          "label": "Live Meeting Transcript"
+        },
         "51": {
           "type": "hud",
           "value": "toggle"

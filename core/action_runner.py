@@ -13,6 +13,11 @@ except Exception:
     DictationService = None
 
 try:
+    from core.meeting_transcriber import MeetingTranscriber
+except Exception:
+    MeetingTranscriber = None  # type: ignore
+
+try:
     import win32gui
     import win32process
     import win32con
@@ -37,6 +42,9 @@ class ActionRunner:
         self._dictation_sessions: dict[str, Any] = {}  # note source -> active session handle
         self._dictation_service = (
             DictationService(logger=self._log) if DictationService else None
+        )
+        self._transcriber = (
+            MeetingTranscriber(logger=self._log) if MeetingTranscriber else None
         )
         self._hold_double_click_sessions: dict[str, threading.Event] = {}
 
@@ -602,6 +610,16 @@ class ActionRunner:
 
             if action_type == "volume_step":
                 platform_utils.volume_step(int(action_value))
+                return False
+
+            if action_type == "transcribe_stream":
+                if self._transcriber is None:
+                    self._log("[action/warn] transcribe_stream: MeetingTranscriber unavailable")
+                    return False
+                if self._transcriber.running:
+                    self._transcriber.stop()
+                else:
+                    self._transcriber.start()
                 return False
 
             self._log(f"[action/warn] unknown action type: {action_type}")
