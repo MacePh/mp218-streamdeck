@@ -1,6 +1,7 @@
 import ctypes
 import ctypes.wintypes
 import queue
+import subprocess
 import sys
 import threading
 import time
@@ -353,9 +354,54 @@ class HUDManager:
         height = max(height, requested_height + 8)
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
+        width = min(width, max(220, screen_w - 32))
+        height = min(height, max(220, screen_h - 32))
+
         x = int((screen_w - width) / 2)
         y = int((screen_h - height) / 2)
+
+        pointer_pos = self._pointer_position()
+        if pointer_pos is not None:
+            px, py = pointer_pos
+            x = int(px - (width / 2))
+            y = int(py - (height / 2))
+
+        x = max(0, min(x, max(0, screen_w - width)))
+        y = max(0, min(y, max(0, screen_h - height)))
         self.root.geometry(f"{width}x{height}+{x}+{y}")
+
+    def _pointer_position(self) -> tuple[int, int] | None:
+        if self._is_windows:
+            try:
+                point = ctypes.wintypes.POINT()
+                ok = ctypes.windll.user32.GetCursorPos(ctypes.byref(point))
+                if not ok:
+                    return None
+                return int(point.x), int(point.y)
+            except Exception:
+                return None
+
+        try:
+            result = subprocess.run(
+                ["xdotool", "getmouselocation", "--shell"],
+                capture_output=True,
+                text=True,
+                timeout=1,
+            )
+            if result.returncode != 0:
+                return None
+            values: dict[str, int] = {}
+            for line in result.stdout.splitlines():
+                if "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                if key in {"X", "Y"}:
+                    values[key] = int(value.strip())
+            if "X" in values and "Y" in values:
+                return values["X"], values["Y"]
+            return None
+        except Exception:
+            return None
 
     def _highlight_profile(self, profile: str) -> None:
         upper = profile.upper()

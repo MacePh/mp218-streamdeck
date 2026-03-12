@@ -32,6 +32,7 @@ class ControlSurfaceApp:
         self.current_bank = "A"
         self.hud_manager: HUDManager | None = None
         self.hud_trigger_queue: queue.Queue[int] = queue.Queue()
+        self._last_midi_reconnect_token = 0
 
     def log(self, message: str) -> None:
         print(message, flush=True)
@@ -111,6 +112,7 @@ class ControlSurfaceApp:
             logger=self.log,
         )
         self.midi.open()
+        self._last_midi_reconnect_token = self.midi.reconnect_token()
 
         self.led = LEDManager(
             midi=self.midi,
@@ -333,6 +335,10 @@ class ControlSurfaceApp:
             self.try_hot_reload()
             self.poll_context_profile()
             self.process_pending_led_restores()
+            if self.midi.reconnect_token() != self._last_midi_reconnect_token:
+                self._last_midi_reconnect_token = self.midi.reconnect_token()
+                self.log("[midi] reconnected; restoring active profile LEDs")
+                self.render_active_profile()
             if self.hud_manager is not None and self.hud_manager.poll_hotkey():
                 self.toggle_hud()
 

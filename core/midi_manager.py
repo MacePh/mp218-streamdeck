@@ -1,6 +1,7 @@
 from typing import Callable
 
 import mido
+import time
 
 
 class MidiManager:
@@ -19,6 +20,9 @@ class MidiManager:
         self.match_substring = match_substring
         self.input_port = None
         self.output_port = None
+        self._last_reconnect_attempt = 0.0
+        self._reconnect_backoff_seconds = 1.0
+        self._reconnect_token = 0
 
     @staticmethod
     def list_input_ports() -> list[str]:
@@ -97,19 +101,61 @@ class MidiManager:
             f"[midi] open input='{self.input_port_name}' output='{self.output_port_name}'"
         )
 
+    def reconnect_token(self) -> int:
+        return self._reconnect_token
+
+    def _close_ports(self) -> None:
+        if self.input_port is not None:
+            try:
+                self.input_port.close()
+            except Exception:
+                pass
+            self.input_port = None
+        if self.output_port is not None:
+            try:
+                self.output_port.close()
+            except Exception:
+                pass
+            self.output_port = None
+
+    def _maybe_reconnect(self, reason: str) -> None:
+        now = time.monotonic()
+        if now - self._last_reconnect_attempt < self._reconnect_backoff_seconds:
+            return
+
+        self._last_reconnect_attempt = now
+        self._log(f"[midi] connection lost ({reason}); attempting reconnect")
+        self._close_ports()
+        try:
+            self.open()
+            self._reconnect_token += 1
+            self._log("[midi] reconnect successful")
+        except Exception as exc:
+            self._log(f"[midi] reconnect failed: {exc}")
+
     def poll_messages(self) -> list[mido.Message]:
         if self.input_port is None:
+            self._maybe_reconnect("input not open")
             return []
-        return list(self.input_port.iter_pending())
+        try:
+            return list(self.input_port.iter_pending())
+        except Exception as exc:
+            self._maybe_reconnect(f"poll error: {exc}")
+            return []
 
     def send(self, message: mido.Message) -> None:
         if self.output_port is None:
-            raise RuntimeError("MIDI output port is not open")
-        self.output_port.send(message)
+            self._maybe_reconnect("output not open")
+            if self.output_port is None:
+                raise RuntimeError("MIDI output port is not open")
+        try:
+            self.output_port.send(message)
+        except Exception as exc:
+            self._maybe_reconnect(f"send error: {exc}")
+            if self.output_port is None:
+                raise
+            self.output_port.send(message)
 
     def close(self) -> None:
-        if self.input_port is not None:
-            self.input_port.close()
-        if self.output_port is not None:
-            self.output_port.close()
+        self._close_ports()
         self._log("[midi] ports closed")
