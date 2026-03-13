@@ -1,6 +1,20 @@
-# Optional - required only for 'dictate' action type (push-to-talk transcription)
+# Core controller dependencies
+mido
+python-rtmidi
+psutil
+numpy
+
+# Optional speech / dictation / transcription features
 faster-whisper
 sounddevice
 soundfile
-pyperclip
-pyautogui
+
+# Platform-specific extras
+pywin32; platform_system == "Windows"
+pyperclip; platform_system == "Windows"
+pyautogui; platform_system == "Windows"
+keyboard; platform_system == "Linux"
+
+# Linux system packages needed for full desktop integration:
+# - python3-tk
+# - wmctrl (or xdotool)

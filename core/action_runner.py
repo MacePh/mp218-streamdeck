@@ -603,13 +603,20 @@ class ActionRunner:
                 return True
 
             if action_type == "toggle_flag":
-                return self.on_toggle_flag(str(action_value))
+                flag_name = str(action_value).strip()
+                if not flag_name:
+                    self._log("[action/error] toggle_flag requires flag name in 'value'")
+                    return False
+                new_value = self.on_toggle_flag(flag_name)
+                self._log(f"[action] toggled flag {flag_name} -> {int(bool(new_value))}")
+                return False
 
             if action_type == "hud":
                 return True  # Handled by caller
 
             if action_type == "volume_step":
-                platform_utils.volume_step(int(action_value))
+                step = int(action_value) if str(action_value).strip() else 1
+                platform_utils.volume_step_placeholder(step)
                 return False
 
             if action_type == "transcribe_stream":

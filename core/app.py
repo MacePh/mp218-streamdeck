@@ -2,6 +2,7 @@ import argparse
 import json
 import time
 import queue
+import sys
 from typing import Any
 
 from core.action_runner import ActionRunner
@@ -79,6 +80,41 @@ class ControlSurfaceApp:
         if enabled:
             self.hud_manager.update(self._hud_model())
 
+    def _adapt_linux_profile_defaults_for_windows(self, config: dict[str, Any]) -> dict[str, Any]:
+        """
+        If config currently points to *_linux profile names, remap to Windows profile
+        names when the non-suffixed profiles exist. Keeps one config usable on both OSes.
+        """
+        if sys.platform != "win32":
+            return config
+
+        profiles = config.get("profiles", {})
+        if not isinstance(profiles, dict):
+            return config
+
+        def remap_profile_name(name: Any) -> Any:
+            if not isinstance(name, str):
+                return name
+            if not name.endswith("_linux"):
+                return name
+            windows_name = name[: -len("_linux")]
+            if windows_name in profiles:
+                return windows_name
+            return name
+
+        controller = config.get("controller")
+        if isinstance(controller, dict):
+            controller["default_profile"] = remap_profile_name(controller.get("default_profile"))
+
+        context_profiles = config.get("context_profiles")
+        if isinstance(context_profiles, dict):
+            remapped: dict[str, Any] = {}
+            for key, value in context_profiles.items():
+                remapped[key] = remap_profile_name(value)
+            config["context_profiles"] = remapped
+
+        return config
+
     def toggle_hud(self) -> None:
         if self.hud_manager is None or not bool(self.config.get("hud", {}).get("enabled", False)):
             return
@@ -91,7 +127,9 @@ class ControlSurfaceApp:
         self.hud_manager.update(self._hud_model())
 
     def setup(self) -> None:
-        self.config = self.config_loader.load_initial()
+        self.config = self._adapt_linux_profile_defaults_for_windows(
+            self.config_loader.load_initial()
+        )
         self.log(f"[config] loaded '{self.config_path}'")
         self.log(
             f"[config] summary {json.dumps({'profiles': list(self.config['profiles'].keys()), 'default_profile': self.config['controller']['default_profile']})}"
@@ -264,7 +302,7 @@ class ControlSurfaceApp:
             return
         assert config is not None
 
-        self.config = config
+        self.config = self._adapt_linux_profile_defaults_for_windows(config)
         self.profile_manager.apply_new_config(config)
         self.led.update_settings(config["midi"], config["led"])
         self._configure_context_manager()
