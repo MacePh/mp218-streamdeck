@@ -201,11 +201,14 @@ class ActionRunner:
 
     # ── Windows focus ─────────────────────────────────────────────────────────
 
-    def _find_window_by_title_substring(self, title_substring: str) -> Optional[int]:
-        """Find a visible window whose title contains title_substring (case-insensitive)."""
+    def _find_window_by_title_substring(
+        self, title_substring: str, process_substring: str = ""
+    ) -> Optional[int]:
+        """Find a visible window by title, optionally constrained to process substring."""
         if win32gui is None:
             return None
         lowered = title_substring.lower()
+        process_lowered = process_substring.lower().strip()
         matched: list[tuple[int, str]] = []
 
         def _cb(hwnd: int, _extra: Any) -> bool:
@@ -213,7 +216,21 @@ class ActionRunner:
                 if not win32gui.IsWindowVisible(hwnd):
                     return True
                 title = win32gui.GetWindowText(hwnd)
-                if title and lowered in title.lower():
+                if not title or lowered not in title.lower():
+                    return True
+                if process_lowered:
+                    if win32process is None:
+                        return True
+                    _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
+                    proc = psutil.Process(window_pid)
+                    process_name = (proc.name() or "").lower()
+                    process_cmdline = " ".join(proc.cmdline() or []).lower()
+                    if (
+                        process_lowered not in process_name
+                        and process_lowered not in process_cmdline
+                    ):
+                        return True
+                if title:
                     matched.append((hwnd, title))
             except Exception:
                 pass
@@ -547,7 +564,10 @@ class ActionRunner:
             if action_type == "focus_or_launch":
                 process_substring = str(action.get("process", "")).strip().lower()
                 window_title = str(action.get("window_title", "")).strip()
-                launch_command = str(action.get("command", action_value)).strip()
+                if sys.platform == "win32" and action.get("command_windows"):
+                    launch_command = str(action["command_windows"]).strip()
+                else:
+                    launch_command = str(action.get("command", "")).strip()
 
                 if not process_substring and not window_title:
                     self._log("[action/error] focus_or_launch requires 'process' or 'window_title'")
@@ -558,10 +578,21 @@ class ActionRunner:
 
                 # Windows-only: title-based focus for WebCatalog apps
                 if window_title and sys.platform == "win32":
-                    hwnd = self._find_window_by_title_substring(window_title)
+                    hwnd = self._find_window_by_title_substring(
+                        window_title, process_substring
+                    )
                     if hwnd is not None:
                         self._log(f"[action] focus by window_title '{window_title}' hwnd={hwnd}")
                         self._force_foreground(hwnd)
+                        try:
+                            if win32gui is not None and win32gui.GetForegroundWindow() == hwnd:
+                                return False
+                        except Exception:
+                            pass
+                        self._log(
+                            f"[action] foreground check failed for '{window_title}', launching"
+                        )
+                        platform_utils.run_command(launch_command)
                         return False
                     self._log(f"[action] window_title '{window_title}' not found, launching")
                     platform_utils.run_command(launch_command)

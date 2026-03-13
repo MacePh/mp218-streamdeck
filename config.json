@@ -86,78 +86,54 @@
   "profiles": {
     "dev": {
       "pads": {
-        "36": {
-          "type": "cmd",
-          "value": "powershell"
-        },
-        "37": {
-          "type": "cmd",
-          "value": "cursor"
-        },
-        "38": {
-          "type": "cmd",
-          "value": "git status"
-        },
-        "39": {
-          "type": "cmd",
-          "value": "docker ps"
-        },
-        "51": {
-          "type": "hud",
-          "value": "toggle"
-        },
-        "52": {
-          "type": "profile",
-          "value": "ai"
-        },
-        "53": {
-          "type": "profile",
-          "value": "stream"
-        },
-        "67": {
-          "type": "hud",
-          "value": "toggle"
-        },
+        "36": { "type": "cmd", "value": "powershell" },
+        "37": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
+        "38": { "type": "cmd", "value": "git status" },
+        "39": { "type": "cmd", "value": "docker ps" },
+        "40": { "type": "focus_or_launch", "process": "obs64", "command": "obs64" },
+        "41": { "type": "focus_or_launch", "process": "discord", "command": "discord" },
+        "42": { "type": "focus_or_launch", "process": "spotify", "command": "spotify" },
+        "43": { "type": "focus_or_launch", "process": "signal", "command": "signal" },
+        "44": { "type": "focus_or_launch", "process": "slack", "command": "slack" },
+        "45": { "type": "key_combo", "value": "alt+tab" },
+        "46": { "type": "key_combo", "value": "ctrl+z" },
+        "47": { "type": "key_combo", "value": "ctrl+shift+t" },
+        "48": { "type": "key_combo", "value": "ctrl+t" },
+        "49": { "type": "key_combo", "value": "ctrl+w" },
+        "50": { "type": "key_combo", "value": "super+d" },
+        "51": { "type": "hud", "value": "toggle" },
+        "52": { "type": "profile", "value": "ai" },
+        "53": { "type": "profile", "value": "stream" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
+          "type": "focus_or_launch", "process": "chatgpt",
           "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
+          "command_windows": "start chatgpt:",
           "window_title": "ChatGPT"
         },
         "69": {
-          "type": "focus_or_launch",
-          "process": "chrome",
+          "type": "focus_or_launch", "process": "claude",
           "command": "google-chrome --new-window https://claude.ai/",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\claude.exe\"",
           "window_title": "Claude"
         },
         "70": {
-          "type": "focus_or_launch",
-          "process": "grok",
+          "type": "focus_or_launch", "process": "grok",
           "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
           "window_title": "Grok"
         },
-        "71": {
-          "type": "focus_or_launch",
-          "process": "cursor",
-          "command": "cursor"
-        },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
         "72": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "start stabilitymatrix"
+          "type": "focus_or_launch", "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage",
+          "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
-        },
-        "83": {
-          "type": "hud",
-          "value": "toggle"
-        }
+        "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "80": { "type": "hold_double_click", "rate_hz": 3 },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": {
@@ -181,92 +157,76 @@
     "ai": {
       "pads": {
         "36": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
+          "type": "focus_or_launch", "process": "chatgpt",
           "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
+          "command_windows": "start chatgpt:",
           "window_title": "ChatGPT"
         },
         "37": {
-          "type": "focus_or_launch",
-          "process": "chrome",
+          "type": "focus_or_launch", "process": "claude",
           "command": "google-chrome --new-window https://claude.ai/",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\claude.exe\"",
           "window_title": "Claude"
         },
         "38": {
-          "type": "focus_or_launch",
-          "process": "grok",
+          "type": "focus_or_launch", "process": "grok",
           "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
           "window_title": "Grok"
         },
-        "39": {
-          "type": "cmd",
-          "value": "cursor"
-        },
+        "39": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
         "40": {
-          "type": "focus_or_launch",
-          "process": "chrome",
-          "command": "start chrome https://gemini.google.com/"
+          "type": "focus_or_launch", "process": "chrome",
+          "command": "google-chrome https://gemini.google.com/",
+          "command_windows": "start chrome https://gemini.google.com/"
         },
         "41": {
-          "type": "cmd",
-          "value": "start stabilitymatrix"
+          "type": "focus_or_launch", "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage",
+          "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
-        "51": {
-          "type": "hud",
-          "value": "toggle"
-        },
-        "52": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "53": {
-          "type": "profile",
-          "value": "stream"
-        },
-        "67": {
-          "type": "hud",
-          "value": "toggle"
-        },
+        "42": { "type": "key_combo", "value": "alt+tab" },
+        "43": { "type": "key_combo", "value": "ctrl+z" },
+        "44": { "type": "key_combo", "value": "ctrl+shift+t" },
+        "45": { "type": "key_combo", "value": "ctrl+t" },
+        "46": { "type": "key_combo", "value": "ctrl+w" },
+        "47": { "type": "key_combo", "value": "ctrl+c" },
+        "48": { "type": "key_combo", "value": "ctrl+v" },
+        "49": { "type": "key_combo", "value": "ctrl+a" },
+        "50": { "type": "key_combo", "value": "super+d" },
+        "51": { "type": "hud", "value": "toggle" },
+        "52": { "type": "profile", "value": "dev" },
+        "53": { "type": "profile", "value": "stream" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
+          "type": "focus_or_launch", "process": "chatgpt",
           "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
+          "command_windows": "start chatgpt:",
           "window_title": "ChatGPT"
         },
         "69": {
-          "type": "focus_or_launch",
-          "process": "chrome",
+          "type": "focus_or_launch", "process": "claude",
           "command": "google-chrome --new-window https://claude.ai/",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\claude.exe\"",
           "window_title": "Claude"
         },
         "70": {
-          "type": "focus_or_launch",
-          "process": "grok",
+          "type": "focus_or_launch", "process": "grok",
           "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
           "window_title": "Grok"
         },
-        "71": {
-          "type": "focus_or_launch",
-          "process": "cursor",
-          "command": "cursor"
-        },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
         "72": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "start stabilitymatrix"
+          "type": "focus_or_launch", "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage",
+          "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
-        },
-        "83": {
-          "type": "hud",
-          "value": "toggle"
-        }
+        "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "80": { "type": "hold_double_click", "rate_hz": 3 },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": {
@@ -285,74 +245,54 @@
     },
     "stream": {
       "pads": {
-        "36": {
-          "type": "cmd",
-          "value": "obs64"
-        },
-        "37": {
-          "type": "cmd",
-          "value": "discord"
-        },
-        "38": {
-          "type": "cmd",
-          "value": "spotify"
-        },
-        "51": {
-          "type": "hud",
-          "value": "toggle"
-        },
-        "52": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "53": {
-          "type": "profile",
-          "value": "ai"
-        },
-        "67": {
-          "type": "hud",
-          "value": "toggle"
-        },
+        "36": { "type": "focus_or_launch", "process": "obs64", "command": "obs64" },
+        "37": { "type": "focus_or_launch", "process": "discord", "command": "discord" },
+        "38": { "type": "focus_or_launch", "process": "spotify", "command": "spotify" },
+        "39": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
+        "40": { "type": "key_combo", "value": "alt+tab" },
+        "41": { "type": "key_combo", "value": "ctrl+z" },
+        "42": { "type": "key_combo", "value": "ctrl+shift+t" },
+        "43": { "type": "key_combo", "value": "ctrl+t" },
+        "44": { "type": "key_combo", "value": "ctrl+w" },
+        "45": { "type": "key_combo", "value": "ctrl+c" },
+        "46": { "type": "key_combo", "value": "ctrl+v" },
+        "47": { "type": "key_combo", "value": "ctrl+a" },
+        "48": { "type": "key_combo", "value": "super+d" },
+        "49": { "type": "key_combo", "value": "ctrl+shift+s" },
+        "50": { "type": "key_combo", "value": "ctrl+shift+r" },
+        "51": { "type": "hud", "value": "toggle" },
+        "52": { "type": "profile", "value": "dev" },
+        "53": { "type": "profile", "value": "ai" },
+        "67": { "type": "hud", "value": "toggle" },
         "68": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
+          "type": "focus_or_launch", "process": "chatgpt",
           "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox",
+          "command_windows": "start chatgpt:",
           "window_title": "ChatGPT"
         },
         "69": {
-          "type": "focus_or_launch",
-          "process": "chrome",
+          "type": "focus_or_launch", "process": "claude",
           "command": "google-chrome --new-window https://claude.ai/",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\AnthropicClaude\\claude.exe\"",
           "window_title": "Claude"
         },
         "70": {
-          "type": "focus_or_launch",
-          "process": "grok",
+          "type": "focus_or_launch", "process": "grok",
           "command": "\"/home/masterp/.webcatalog/Grok/Grok\" --no-sandbox",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Local\\Programs\\WebCatalogApps\\Grok\\Grok.exe\"",
           "window_title": "Grok"
         },
-        "71": {
-          "type": "focus_or_launch",
-          "process": "cursor",
-          "command": "cursor"
-        },
+        "71": { "type": "focus_or_launch", "process": "cursor", "command": "cursor" },
         "72": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "start stabilitymatrix"
+          "type": "focus_or_launch", "process": "stabilitymatrix",
+          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage",
+          "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
-        },
-        "83": {
-          "type": "hud",
-          "value": "toggle"
-        }
+        "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "80": { "type": "hold_double_click", "rate_hz": 3 },
+        "81": { "type": "profile", "value": "dev" },
+        "82": { "type": "profile", "value": "ai" },
+        "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
         "1": {
