@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import webbrowser
 import ctypes
 import ctypes.wintypes
@@ -69,6 +70,15 @@ def _combo(*vks: int) -> None:
 # ── Platform helpers ───────────────────────────────────────────────────────────
 def is_windows() -> bool:
     return os.name == "nt"
+
+
+def use_windows_paths() -> bool:
+    """
+    True when Windows-style paths and desktop APIs (cmd.exe, F:\\..., win32gui)
+    should be used. Includes CPython win32 plus Git Bash / MSYS2 / Cygwin
+    interpreters (sys.platform msys/cygwin), but not WSL (linux).
+    """
+    return sys.platform in ("win32", "msys", "cygwin")
 
 
 def is_linux() -> bool:

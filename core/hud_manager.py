@@ -10,6 +10,8 @@ from tkinter import font as tkfont
 from typing import Callable
 from urllib.parse import urlparse
 
+from core import platform_utils
+
 
 def get_pad_grid(bank: str) -> list[list[int]]:
     base = {"A": 36, "B": 52, "C": 68}[bank]
@@ -51,7 +53,7 @@ class HUDManager:
         self._hotkey_registered = False
         self._hotkey_mod = 0
         self._hotkey_vk = 0
-        self._is_windows = sys.platform == "win32"
+        self._is_windows = platform_utils.use_windows_paths()
 
     def configure(self, hud_config: dict, controller_config: dict) -> None:
         self._hud_config = {
@@ -255,13 +257,21 @@ class HUDManager:
         self.root.mainloop()
 
     def _action_label(self, action: dict) -> str:
+        custom = action.get("label")
+        if isinstance(custom, str) and custom.strip():
+            return custom.strip()
         action_type = action.get("type", "noop")
         value = str(action.get("value", ""))
         if action_type == "focus_or_launch":
             process = str(action.get("process", "")).strip()
             return process.title() if process else "Focus/Launch"
         if action_type == "cmd":
-            first = value.strip().split(" ")[0] if value.strip() else "Command"
+            raw = value
+            if platform_utils.use_windows_paths() and str(
+                action.get("value_windows", "")
+            ).strip():
+                raw = str(action.get("value_windows", ""))
+            first = raw.strip().split(" ")[0] if raw.strip() else "Command"
             return first.replace("start", "").strip().title() or "Command"
         if action_type == "url":
             try:
@@ -274,6 +284,8 @@ class HUDManager:
             return f"Profile {value.upper()}"
         if action_type == "log":
             return "Log"
+        if action_type == "restart":
+            return "Restart"
         if action_type == "hud":
             return "HUD"
         if action_type == "noop":

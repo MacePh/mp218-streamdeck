@@ -84,6 +84,18 @@ Preferred:
 .\run.ps1
 ```
 
+Enable logon autostart on Windows:
+
+```powershell
+.\install-autostart.ps1
+```
+
+Remove logon autostart:
+
+```powershell
+.\remove-autostart.ps1
+```
+
 Direct:
 
 ```powershell
@@ -274,6 +286,9 @@ If an app command is not in PATH, replace with full executable path.
 
 - App command does not launch  
   Replace `cmd` value with a command available in PATH or full executable path.
+
+- App no longer auto-starts after BIOS/firmware updates  
+  Reinstall the scheduled task: `.\install-autostart.ps1`
 
 - Config change does nothing  
   Validate JSON syntax; invalid reloads are rejected and previous good config stays active.

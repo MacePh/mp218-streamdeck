@@ -98,7 +98,7 @@
         "45": { "type": "key_combo", "value": "alt+tab" },
         "46": { "type": "key_combo", "value": "ctrl+z" },
         "47": { "type": "key_combo", "value": "ctrl+shift+t" },
-        "48": { "type": "key_combo", "value": "ctrl+t" },
+        "48": { "type": "restart" },
         "49": { "type": "key_combo", "value": "ctrl+w" },
         "50": { "type": "key_combo", "value": "super+d" },
         "51": { "type": "hud", "value": "toggle" },
@@ -130,28 +130,24 @@
           "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
         "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "76": {
+          "type": "cmd",
+          "label": "Yeah. Flux Gym",
+          "value": "bash -lc 'cd ~/fluxgym && . fluxgym_venv/bin/activate && exec python app.py'",
+          "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
+        },
         "80": { "type": "hold_double_click", "rate_hz": 3 },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
         "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "Dev knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo DEV_KNOB_2"
-        },
-        "3": {
-          "type": "volume_step",
-          "value": "1"
-        },
-        "4": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     },
     "ai": {
@@ -191,7 +187,7 @@
         "45": { "type": "key_combo", "value": "ctrl+t" },
         "46": { "type": "key_combo", "value": "ctrl+w" },
         "47": { "type": "key_combo", "value": "ctrl+c" },
-        "48": { "type": "key_combo", "value": "ctrl+v" },
+        "48": { "type": "restart" },
         "49": { "type": "key_combo", "value": "ctrl+a" },
         "50": { "type": "key_combo", "value": "super+d" },
         "51": { "type": "hud", "value": "toggle" },
@@ -223,24 +219,24 @@
           "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
         "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "76": {
+          "type": "cmd",
+          "label": "Yeah. Flux Gym",
+          "value": "bash -lc 'cd ~/fluxgym && . fluxgym_venv/bin/activate && exec python app.py'",
+          "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
+        },
         "80": { "type": "hold_double_click", "rate_hz": 3 },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
         "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "AI knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo AI_KNOB_2"
-        },
-        "3": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     },
     "stream": {
@@ -257,7 +253,7 @@
         "45": { "type": "key_combo", "value": "ctrl+c" },
         "46": { "type": "key_combo", "value": "ctrl+v" },
         "47": { "type": "key_combo", "value": "ctrl+a" },
-        "48": { "type": "key_combo", "value": "super+d" },
+        "48": { "type": "restart" },
         "49": { "type": "key_combo", "value": "ctrl+shift+s" },
         "50": { "type": "key_combo", "value": "ctrl+shift+r" },
         "51": { "type": "hud", "value": "toggle" },
@@ -289,24 +285,24 @@
           "command_windows": "\"F:\\StabilityMatrix-win-x64\\StabilityMatrix.exe\""
         },
         "75": { "type": "dictate", "model": "base.en", "language": "en" },
+        "76": {
+          "type": "cmd",
+          "label": "Yeah. Flux Gym",
+          "value": "bash -lc 'cd ~/fluxgym && . fluxgym_venv/bin/activate && exec python app.py'",
+          "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
+        },
         "80": { "type": "hold_double_click", "rate_hz": 3 },
         "81": { "type": "profile", "value": "dev" },
         "82": { "type": "profile", "value": "ai" },
         "83": { "type": "hud", "value": "toggle" }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "Stream knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo STREAM_KNOB_2"
-        },
-        "3": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     },
     "legacy_linux": {
@@ -366,11 +362,7 @@
           "process": "cursor-1.4.5-x86_64",
           "command": "/home/masterp/Applications/Cursor-1.4.5-x86_64.AppImage"
         },
-        "48": {
-          "type": "focus_or_launch",
-          "process": "chatgpt",
-          "command": "\"/home/masterp/.webcatalog/ChatGPT/ChatGPT\" --no-sandbox"
-        },
+        "48": { "type": "restart" },
         "49": {
           "type": "focus_or_launch",
           "process": "grok",
@@ -495,7 +487,9 @@
         },
         "76": {
           "type": "cmd",
-          "value": "xdg-open \"/www/tickets\""
+          "label": "Yeah. Flux Gym",
+          "value": "bash -lc 'cd ~/fluxgym && . fluxgym_venv/bin/activate && exec python app.py'",
+          "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
         },
         "77": {
           "type": "focus_or_launch",
@@ -604,7 +598,8 @@
         "75": {
           "type": "dictate",
           "model": "base.en",
-          "language": "en"
+          "language": "en",
+          "input_device": "pulse"
         },
         "80": {
           "type": "hold_double_click",
@@ -624,22 +619,12 @@
         }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "Dev knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo DEV_KNOB_2"
-        },
-        "3": {
-          "type": "volume_step",
-          "value": "1"
-        },
-        "4": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     },
     "ai_linux": {
@@ -744,18 +729,12 @@
         }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "AI knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo AI_KNOB_2"
-        },
-        "3": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     },
     "stream_linux": {
@@ -840,18 +819,12 @@
         }
       },
       "knobs": {
-        "1": {
-          "type": "log",
-          "value": "Stream knob 1 moved"
-        },
-        "2": {
-          "type": "cmd",
-          "value": "echo STREAM_KNOB_2"
-        },
-        "3": {
-          "type": "noop",
-          "value": ""
-        }
+        "3":  { "type": "volume_step",     "value": "" },
+        "9":  { "type": "media_step",      "value": "" },
+        "12": { "type": "brightness_step", "value": "" },
+        "13": { "type": "scroll_step",     "value": "" },
+        "14": { "type": "tab_step",        "value": "" },
+        "15": { "type": "zoom_step",       "value": "" }
       }
     }
   }

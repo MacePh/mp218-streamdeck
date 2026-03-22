@@ -24,9 +24,34 @@ except ImportError:
 
 
 class DictationService:
+    _MIN_AUDIO_SECONDS = 0.35
+    _MIN_RMS_FOR_TRANSCRIBE = 0.003
+    _LOW_ENERGY_SHORT_TEXT_RMS = 0.01
+    _SHORT_TEXT_SUPPRESSION_SECONDS = 1.2
+    _SUPPRESSED_SHORT_TEXTS = {
+        "you",
+        "you.",
+        "you!",
+        "you?",
+        "thank you",
+        "thanks",
+    }
+
     def __init__(self, logger: Callable[[str], None]):
         self._log = logger
         self._model_cache: dict[str, Any] = {}
+
+    @staticmethod
+    def _normalize_text(text: str) -> str:
+        return " ".join(text.strip().lower().split())
+
+    def _should_suppress_transcript(self, text: str, audio_rms: float, duration_seconds: float) -> bool:
+        normalized = self._normalize_text(text)
+        if normalized not in self._SUPPRESSED_SHORT_TEXTS:
+            return False
+        if duration_seconds > self._SHORT_TEXT_SUPPRESSION_SECONDS:
+            return False
+        return audio_rms <= self._LOW_ENERGY_SHORT_TEXT_RMS
 
     def _get_model(self, model_size: str) -> Any:
         if WhisperModel is None:
@@ -41,7 +66,12 @@ class DictationService:
             self._log(f"[dictation] model '{model_size}' ready")
         return self._model_cache[model_size]
 
-    def start_recording(self, model: str = "base.en", language: str = "en") -> dict[str, Any] | None:
+    def start_recording(
+        self,
+        model: str = "base.en",
+        language: str = "en",
+        input_device: str | int | None = None,
+    ) -> dict[str, Any] | None:
         if sd is None or np is None or sf is None:
             self._log("[dictation] missing dependencies: sounddevice/soundfile/numpy")
             return None
@@ -67,11 +97,18 @@ class DictationService:
                 except Exception:
                     pass
 
+            stream_kwargs: dict[str, Any] = {
+                "samplerate": 16000,
+                "channels": 1,
+                "dtype": "float32",
+                "callback": _audio_callback,
+            }
+            if input_device is not None and str(input_device).strip() != "":
+                stream_kwargs["device"] = input_device
+                self._log(f"[dictation] using input device: {input_device}")
+
             stream = sd.InputStream(
-                samplerate=16000,
-                channels=1,
-                dtype="float32",
-                callback=_audio_callback,
+                **stream_kwargs,
             )
             stream.start()
             session["stream"] = stream
@@ -119,6 +156,19 @@ class DictationService:
                 return
 
             samplerate = int(session.get("samplerate", 16000))
+            duration_seconds = float(audio.shape[0]) / float(samplerate)
+            audio_rms = float(np.sqrt(np.mean(audio.astype("float64") ** 2)))
+            if duration_seconds < self._MIN_AUDIO_SECONDS:
+                self._log(
+                    f"[dictation] skipped short capture ({duration_seconds:.2f}s < {self._MIN_AUDIO_SECONDS:.2f}s)"
+                )
+                return
+            if audio_rms < self._MIN_RMS_FOR_TRANSCRIBE:
+                self._log(
+                    f"[dictation] skipped low-energy capture (rms={audio_rms:.4f} < {self._MIN_RMS_FOR_TRANSCRIBE:.4f})"
+                )
+                return
+
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 temp_path = Path(tmp.name)
 
@@ -127,10 +177,20 @@ class DictationService:
             model_size = str(session.get("model", "base.en"))
             language = str(session.get("language", "en"))
             model = self._get_model(model_size)
-            segments, _info = model.transcribe(str(temp_path), language=language)
+            segments, _info = model.transcribe(
+                str(temp_path),
+                language=language,
+                vad_filter=True,
+                condition_on_previous_text=False,
+            )
             text = " ".join(segment.text for segment in segments).strip()
             if not text:
                 self._log("[dictation] no speech detected")
+                return
+            if self._should_suppress_transcript(text, audio_rms=audio_rms, duration_seconds=duration_seconds):
+                self._log(
+                    f"[dictation] suppressed likely hallucination ({duration_seconds:.2f}s, rms={audio_rms:.4f}): {text}"
+                )
                 return
 
             elapsed = time.monotonic() - float(session.get("started_at", time.monotonic()))

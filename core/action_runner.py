@@ -35,10 +35,12 @@ class ActionRunner:
         logger: Callable[[str], None],
         on_profile_change: Callable[[str], None],
         on_toggle_flag: Callable[[str], bool],
+        on_restart: Callable[[], None] | None = None,
     ):
         self._log = logger
         self.on_profile_change = on_profile_change
         self.on_toggle_flag = on_toggle_flag
+        self.on_restart = on_restart
         self._dictation_sessions: dict[str, Any] = {}  # note source -> active session handle
         self._dictation_service = (
             DictationService(logger=self._log) if DictationService else None
@@ -66,7 +68,7 @@ class ActionRunner:
         self._dictation_service.stop_and_transcribe(session)
 
     def _perform_double_click(self) -> None:
-        if sys.platform == "win32":
+        if platform_utils.use_windows_paths():
             try:
                 import pyautogui
                 pyautogui.doubleClick()
@@ -244,7 +246,7 @@ class ActionRunner:
 
     def _focus_window_by_pid(self, pid: int) -> bool:
         """Focus a window by PID — dispatches to Linux or Windows implementation."""
-        if sys.platform != "win32":
+        if not platform_utils.use_windows_paths():
             return self._focus_window_linux(pid)
 
         if win32gui is None or win32process is None:
@@ -290,7 +292,7 @@ class ActionRunner:
 
         windows: list[tuple[str, str]] = []
 
-        if sys.platform == "win32":
+        if platform_utils.use_windows_paths():
             if win32gui is None or win32process is None:
                 return []
 
@@ -458,7 +460,7 @@ class ActionRunner:
 
     def _focus_window_by_id(self, window_id_str: str) -> bool:
         """Focus a window by its platform-specific ID string."""
-        if sys.platform == "win32":
+        if platform_utils.use_windows_paths():
             if win32gui is None:
                 return False
             try:
@@ -537,8 +539,19 @@ class ActionRunner:
                 self._log(f"[action/log] {action_value}")
                 return False
 
+            if action_type == "restart":
+                if self.on_restart is None:
+                    self._log("[action/warn] restart: no handler configured")
+                    return False
+                self._log("[action] restart requested")
+                self.on_restart()
+                return False
+
             if action_type == "cmd":
-                platform_utils.run_command(str(action_value))
+                if platform_utils.use_windows_paths() and action.get("value_windows"):
+                    platform_utils.run_command(str(action["value_windows"]))
+                else:
+                    platform_utils.run_command(str(action_value))
                 return False
 
             if action_type == "dictate":
@@ -547,10 +560,12 @@ class ActionRunner:
                     return False
                 model = str(action.get("model", "base.en"))
                 language = str(action.get("language", "en"))
+                input_device = action.get("input_device")
                 self._log(f"[action] dictate start note={source} model={model}")
                 session = self._dictation_service.start_recording(
                     model=model,
                     language=language,
+                    input_device=input_device,
                 )
                 if session is not None:
                     self._dictation_sessions[source] = session
@@ -564,7 +579,7 @@ class ActionRunner:
             if action_type == "focus_or_launch":
                 process_substring = str(action.get("process", "")).strip().lower()
                 window_title = str(action.get("window_title", "")).strip()
-                if sys.platform == "win32" and action.get("command_windows"):
+                if platform_utils.use_windows_paths() and action.get("command_windows"):
                     launch_command = str(action["command_windows"]).strip()
                 else:
                     launch_command = str(action.get("command", "")).strip()
@@ -577,7 +592,7 @@ class ActionRunner:
                     return False
 
                 # Windows-only: title-based focus for WebCatalog apps
-                if window_title and sys.platform == "win32":
+                if window_title and platform_utils.use_windows_paths():
                     hwnd = self._find_window_by_title_substring(
                         window_title, process_substring
                     )
@@ -646,8 +661,33 @@ class ActionRunner:
                 return True  # Handled by caller
 
             if action_type == "volume_step":
-                step = int(action_value) if str(action_value).strip() else 1
-                platform_utils.volume_step_placeholder(step)
+                step = int(value)
+                platform_utils.volume_step(step)
+                return False
+
+            if action_type == "media_step":
+                step = int(value)
+                platform_utils.media_step(step)
+                return False
+
+            if action_type == "brightness_step":
+                step = int(value)
+                platform_utils.brightness_step(step)
+                return False
+
+            if action_type == "scroll_step":
+                step = int(value)
+                platform_utils.scroll_vertical(step)
+                return False
+
+            if action_type == "tab_step":
+                step = int(value)
+                platform_utils.tab_step(step)
+                return False
+
+            if action_type == "zoom_step":
+                step = int(value)
+                platform_utils.zoom_step(step)
                 return False
 
             if action_type == "transcribe_stream":

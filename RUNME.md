@@ -44,6 +44,11 @@ systemctl --user disable --now mpd-streamdeck.service
 
 Run from project root (`mpd-streamdeck`).
 
+### Enable autostart (Task Scheduler)
+```powershell
+.\install-autostart.ps1
+```
+
 ### IMPORTANT: Dictation dependency install (Windows)
 If you use the `dictate` action type, install optional dependencies first:
 ```powershell
@@ -61,11 +66,27 @@ Without this, push-to-talk dictation will not start.
 python controller.py --config config.json
 ```
 
-### Restart
+### Restart (script — same logic as pad 48)
+```powershell
+.\restart.ps1
+```
+
+### Desktop shortcut (manual restart if the pad button fails)
+Run once (creates **Restart MPD Streamdeck** on your Desktop):
+```powershell
+.\install-desktop-restart-shortcut.ps1
+```
+
+### Restart (manual)
 1) Stop the running process (Ctrl+C in the terminal where it is running).  
 2) Start again with:
 ```powershell
 .\run.ps1
+```
+
+### Disable autostart
+```powershell
+.\remove-autostart.ps1
 ```
 
 ## Config hot reload

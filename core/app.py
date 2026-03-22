@@ -1,10 +1,12 @@
 import argparse
 import json
+import os
 import time
 import queue
 import sys
 from typing import Any
 
+from core import platform_utils
 from core.action_runner import ActionRunner
 from core.config_loader import ConfigLoader
 from core.context_manager import ContextManager
@@ -34,9 +36,21 @@ class ControlSurfaceApp:
         self.hud_manager: HUDManager | None = None
         self.hud_trigger_queue: queue.Queue[int] = queue.Queue()
         self._last_midi_reconnect_token = 0
+        self._restart_requested = False
 
     def log(self, message: str) -> None:
         print(message, flush=True)
+
+    def _request_restart(self) -> None:
+        self._restart_requested = True
+
+    def _exec_restart(self) -> None:
+        controller_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "controller.py")
+        )
+        cfg = os.path.abspath(self.config_path)
+        self.log(f"[app] exec restart: {controller_path} --config {cfg}")
+        os.execv(sys.executable, [sys.executable, controller_path, "--config", cfg])
 
     def _bank_for_note(self, note: int) -> str:
         if 36 <= note <= 51:
@@ -85,7 +99,7 @@ class ControlSurfaceApp:
         If config currently points to *_linux profile names, remap to Windows profile
         names when the non-suffixed profiles exist. Keeps one config usable on both OSes.
         """
-        if sys.platform != "win32":
+        if not platform_utils.use_windows_paths():
             return config
 
         profiles = config.get("profiles", {})
@@ -163,6 +177,7 @@ class ControlSurfaceApp:
             logger=self.log,
             on_profile_change=self.switch_profile,
             on_toggle_flag=lambda flag: self.state.toggle_flag(flag) if self.state else False,
+            on_restart=self._request_restart,
         )
 
         hot_reload_ms = int(self.config["controller"].get("hot_reload_interval_ms", 750))
@@ -281,10 +296,11 @@ class ControlSurfaceApp:
         previous = self.knob_last_values.get(cc)
         if previous is not None and abs(value - previous) < threshold:
             return
+        step = 0 if previous is None else (1 if value > previous else -1)
         self.knob_last_values[cc] = value
         action = self.profile_manager.get_knob_action(cc)
-        self.log(f"[knob] cc={cc} value={value} channel={channel}")
-        self.action_runner.run_knob_action(action, cc, value)
+        self.log(f"[knob] cc={cc} value={value} step={step} channel={channel}")
+        self.action_runner.run_knob_action(action, cc, step)
 
     def try_hot_reload(self) -> None:
         assert self.hot_reload is not None
@@ -370,6 +386,8 @@ class ControlSurfaceApp:
         log_midi = bool(self.config["controller"].get("log_midi_input", True))
 
         while True:
+            if self._restart_requested:
+                break
             self.try_hot_reload()
             self.poll_context_profile()
             self.process_pending_led_restores()
@@ -413,10 +431,11 @@ class ControlSurfaceApp:
             time.sleep(0.01)
 
     def run(self) -> int:
+        restart = False
         try:
             self.setup()
             self.run_loop()
-            return 0
+            restart = self._restart_requested
         except KeyboardInterrupt:
             self.log("[app] stopped by user")
             return 0
@@ -429,6 +448,13 @@ class ControlSurfaceApp:
                     self.midi.close()
                 except Exception:
                     pass
+        if restart:
+            try:
+                self._exec_restart()
+            except OSError as exc:
+                self.log(f"[app/error] restart exec failed: {exc}")
+                return 1
+        return 0
 
 
 def main() -> int:
