@@ -4,6 +4,7 @@ import subprocess
 import threading
 
 from core import platform_utils
+from core.markdown_capture import MarkdownCapture
 from core.telegram_sender import TelegramSender
 import psutil
 
@@ -50,6 +51,7 @@ class ActionRunner:
         )
         self._hold_double_click_sessions: dict[str, threading.Event] = {}
         self._telegram_sender = TelegramSender(logger=self._log)
+        self._markdown_capture = MarkdownCapture(logger=self._log)
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
         return self._run(action, source=f"pad:{note}", value=velocity)
@@ -80,6 +82,12 @@ class ActionRunner:
                 on_text=lambda text: self._send_transcript_to_telegram(text, action),
             )
             return
+        if mode == "markdown_daily":
+            self._dictation_service.stop_and_transcribe(
+                session,
+                on_text=lambda text: self._append_transcript_to_markdown(text, action),
+            )
+            return
 
         self._dictation_service.stop_and_transcribe(session)
 
@@ -90,6 +98,21 @@ class ActionRunner:
                 self._log(f"[action] dictated message sent: {text}")
         except Exception as exc:
             self._log(f"[action/error] dictate_to_telegram failed: {exc}")
+
+    def _append_transcript_to_markdown(self, text: str, action: dict[str, Any]) -> None:
+        try:
+            directory = str(action.get("path", "")).strip()
+            if not directory:
+                raise RuntimeError("dictate_to_markdown requires 'path'")
+            open_in_typora = bool(action.get("open_in_typora", False))
+            self._markdown_capture.append_daily_entry(
+                text=text,
+                directory=directory,
+                open_in_typora=open_in_typora,
+            )
+            self._log(f"[action] dictated markdown captured: {text}")
+        except Exception as exc:
+            self._log(f"[action/error] dictate_to_markdown failed: {exc}")
 
     def _perform_double_click(self) -> None:
         if platform_utils.use_windows_paths():
@@ -572,11 +595,25 @@ class ActionRunner:
                     platform_utils.run_command(str(action_value))
                 return False
 
+            if action_type == "new_markdown_doc":
+                directory = str(action.get("path", "")).strip()
+                if not directory:
+                    self._log("[action/error] new_markdown_doc requires 'path'")
+                    return False
+                title = str(action.get("title", "Untitled Idea")).strip() or "Untitled Idea"
+                open_in_typora = bool(action.get("open_in_typora", True))
+                self._markdown_capture.create_new_document(
+                    directory=directory,
+                    template_title=title,
+                    open_in_typora=open_in_typora,
+                )
+                return False
+
             if action_type == "key_combo":
                 self._run_key_combo(str(action_value))
                 return False
 
-            if action_type == "dictate" or action_type == "dictate_to_telegram":
+            if action_type in ("dictate", "dictate_to_telegram", "dictate_to_markdown"):
                 if self._dictation_service is None:
                     self._log("[action/warn] dictate: DictationService unavailable")
                     return False
@@ -590,7 +627,11 @@ class ActionRunner:
                     input_device=input_device,
                 )
                 if session is not None:
-                    mode = "telegram" if action_type == "dictate_to_telegram" else "inject"
+                    mode = "inject"
+                    if action_type == "dictate_to_telegram":
+                        mode = "telegram"
+                    elif action_type == "dictate_to_markdown":
+                        mode = "markdown_daily"
                     self._dictation_sessions[source] = {
                         "session": session,
                         "mode": mode,

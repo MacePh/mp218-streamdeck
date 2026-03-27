@@ -15,15 +15,15 @@
 
 ## Current status
 - Boris dictation exists as action type `dictate_to_telegram`.
-- Pad 74 was previously made Boris across profiles.
-- Thread-button request was interpreted as **OpenClaw/Boris sessions**.
-- Practical implementation chosen:
+- Markdown capture actions now exist:
+  - `dictate_to_markdown` = hold-to-talk append into daily markdown note
+  - `new_markdown_doc` = create standalone markdown file and open in Typora
+- Current pad cluster across all profiles:
+  - `73` = new markdown doc in `F:\notes\ideas` (opens in Typora)
+  - `74` = daily idea capture in `F:\notes\ideas\YYYY-MM-DD.md`
   - `77` = list Boris/OpenClaw threads (`openclaw sessions`)
   - `78` = Boris thread UI (`openclaw tui`)
   - `79` = Talk to Boris (`dictate_to_telegram`)
-- Follow-up cleanup completed:
-  - `74` no longer points to Boris and was cleared to `noop` where it still had the old Boris action.
-  - Verified `79` is Boris across all profiles.
 - This is a practical CLI-driven implementation, not a deep session-API integration.
 
 ## Notes

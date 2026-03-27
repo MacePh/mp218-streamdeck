@@ -227,8 +227,12 @@
           "value": "toggle"
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -248,6 +252,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "73": {
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         }
       },
       "knobs": {
@@ -428,8 +439,12 @@
           "value": "toggle"
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -449,6 +464,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "73": {
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         }
       },
       "knobs": {
@@ -619,8 +641,12 @@
           "value": "toggle"
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -640,6 +666,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "73": {
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         }
       },
       "knobs": {
@@ -838,12 +871,19 @@
           "value": "xdg-open \"/home/masterp/Sacred\""
         },
         "73": {
-          "type": "cmd",
-          "value": "xdg-open \"/www/tickets\""
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "75": {
           "type": "focus_or_launch",
@@ -956,13 +996,19 @@
           "command": "/mnt/ai-models/software/launch-pygpt.sh"
         },
         "73": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "75": {
           "type": "dictate",
@@ -1125,13 +1171,19 @@
           "value": "toggle"
         },
         "73": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -1252,13 +1304,19 @@
           "value": "toggle"
         },
         "73": {
-          "type": "focus_or_launch",
-          "process": "stabilitymatrix",
-          "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
+          "type": "new_markdown_doc",
+          "label": "New Idea Doc",
+          "path": "F:\\notes\\ideas",
+          "title": "Untitled Idea",
+          "open_in_typora": true
         },
         "74": {
-          "type": "noop",
-          "value": ""
+          "type": "dictate_to_markdown",
+          "label": "Daily Idea",
+          "path": "F:\\notes\\ideas",
+          "model": "base.en",
+          "language": "en",
+          "open_in_typora": false
         },
         "79": {
           "type": "dictate_to_telegram",
