@@ -15,6 +15,9 @@
 
 ## Current status
 - Boris dictation now uses `dictate_to_openclaw` for pad 79 so Boris input routes through OpenClaw instead of raw Telegram bot send.
+- Extra confirmation added for pad 79:
+  - explicit `[boris] ...` log lines
+  - desktop popup when transcript is heard/sent (Windows MessageBox, Linux `notify-send`)
 - Legacy `dictate_to_telegram` still exists in code but is no longer the primary Boris path.
 - Markdown capture actions now exist:
   - `dictate_to_markdown` = hold-to-talk append into daily markdown note

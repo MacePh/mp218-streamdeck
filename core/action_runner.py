@@ -124,9 +124,11 @@ class ActionRunner:
 
     def _send_transcript_to_openclaw(self, text: str, action: dict[str, Any]) -> None:
         try:
+            self._log("[boris] transcript captured")
             ok = self._openclaw_sender.send_to_boris(text, action)
             if ok:
                 self._log(f"[action] dictated OpenClaw message sent: {text}")
+                self._log("[boris] waiting for reply")
         except Exception as exc:
             self._log(f"[action/error] dictate_to_openclaw failed: {exc}")
 

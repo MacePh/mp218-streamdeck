@@ -179,7 +179,7 @@ Supported action types in pad/knob mappings:
 - `focus_or_launch` - focus running app window or launch it if not running
 - `dictate` - hold pad to record microphone input, release to transcribe and type at cursor
 - `dictate_to_telegram` - hold pad to record microphone input, release to transcribe and send to Telegram
-- `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing
+- `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing (with extra local confirmation)
 - `dictate_to_markdown` - hold pad to record microphone input, release to transcribe and append to a daily markdown file
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile
