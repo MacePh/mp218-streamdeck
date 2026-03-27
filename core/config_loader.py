@@ -125,9 +125,8 @@ class ConfigLoader:
                 raise ConfigError("hud.opacity must be a number > 0 and <= 1")
 
         profiles = config["profiles"]
-        for profile_name in ["dev", "ai", "stream"]:
-            if profile_name not in profiles:
-                raise ConfigError(f"Missing required profile: {profile_name}")
+        if not isinstance(profiles, dict) or not profiles:
+            raise ConfigError("profiles must be a non-empty object")
         if default_profile not in profiles:
             raise ConfigError(f"default_profile '{default_profile}' does not exist in profiles")
 
@@ -146,6 +145,8 @@ class ConfigLoader:
                     )
 
         for profile_name, profile_config in profiles.items():
+            if not isinstance(profile_config, dict):
+                raise ConfigError(f"profiles.{profile_name} must be an object")
             pads = profile_config.get("pads", {})
             knobs = profile_config.get("knobs", {})
             if not isinstance(pads, dict):

@@ -26,3 +26,8 @@ Thumbs.db
 *.AppImage
 build/
 dist/
+
+# Local secrets
+.env
+.env.*
+!.env.example

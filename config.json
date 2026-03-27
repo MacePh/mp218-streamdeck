@@ -592,8 +592,11 @@
           "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
         },
         "74": {
-          "type": "cmd",
-          "value": "env PYTHONPATH=\"/home/masterp/Apps/mpd218-controller/whisper-venv/lib/python3.12/site-packages\" /home/masterp/Apps/mpd218-controller/whisper-venv/bin/python /home/masterp/Apps/mpd218-controller/speech-to-text/transcribe.py"
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
         },
         "75": {
           "type": "dictate",
@@ -724,8 +727,11 @@
           "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
         },
         "74": {
-          "type": "cmd",
-          "value": "env PYTHONPATH=\"/home/masterp/Apps/mpd218-controller/whisper-venv/lib/python3.12/site-packages\" /home/masterp/Apps/mpd218-controller/whisper-venv/bin/python /home/masterp/Apps/mpd218-controller/speech-to-text/transcribe.py"
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
         }
       },
       "knobs": {

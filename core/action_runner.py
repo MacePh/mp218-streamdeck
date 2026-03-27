@@ -1,10 +1,10 @@
 from typing import Any, Callable
 from typing import Optional
 import subprocess
-import sys
 import threading
 
 from core import platform_utils
+from core.telegram_sender import TelegramSender
 import psutil
 
 try:
@@ -41,7 +41,7 @@ class ActionRunner:
         self.on_profile_change = on_profile_change
         self.on_toggle_flag = on_toggle_flag
         self.on_restart = on_restart
-        self._dictation_sessions: dict[str, Any] = {}  # note source -> active session handle
+        self._dictation_sessions: dict[str, dict[str, Any]] = {}
         self._dictation_service = (
             DictationService(logger=self._log) if DictationService else None
         )
@@ -49,6 +49,7 @@ class ActionRunner:
             MeetingTranscriber(logger=self._log) if MeetingTranscriber else None
         )
         self._hold_double_click_sessions: dict[str, threading.Event] = {}
+        self._telegram_sender = TelegramSender(logger=self._log)
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
         return self._run(action, source=f"pad:{note}", value=velocity)
@@ -58,14 +59,37 @@ class ActionRunner:
 
     def on_dictate_release(self, note: int) -> None:
         source = f"pad:{note}"
-        session = self._dictation_sessions.pop(source, None)
-        if session is None:
+        entry = self._dictation_sessions.pop(source, None)
+        if entry is None:
             self._log(f"[action] dictate release: no active session for {source}")
             return
         if self._dictation_service is None:
             return
-        self._log(f"[action] dictate stop + transcribe {source}")
+
+        session = entry.get("session")
+        mode = str(entry.get("mode", "inject"))
+        action = entry.get("action", {})
+        if session is None:
+            self._log(f"[action] dictate release: invalid session for {source}")
+            return
+
+        self._log(f"[action] dictate stop + transcribe {source} mode={mode}")
+        if mode == "telegram":
+            self._dictation_service.stop_and_transcribe(
+                session,
+                on_text=lambda text: self._send_transcript_to_telegram(text, action),
+            )
+            return
+
         self._dictation_service.stop_and_transcribe(session)
+
+    def _send_transcript_to_telegram(self, text: str, action: dict[str, Any]) -> None:
+        try:
+            ok = self._telegram_sender.send_message(text, action)
+            if ok:
+                self._log(f"[action] dictated message sent: {text}")
+        except Exception as exc:
+            self._log(f"[action/error] dictate_to_telegram failed: {exc}")
 
     def _perform_double_click(self) -> None:
         if platform_utils.use_windows_paths():
@@ -113,8 +137,6 @@ class ActionRunner:
         stop_event.set()
         self._log(f"[action] hold_double_click stop {source}")
 
-    # ── Process discovery ──────────────────────────────────────────────────────
-
     def _find_process_pid(self, process_substring: str) -> Optional[int]:
         lowered = process_substring.lower()
         for process in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
@@ -128,7 +150,6 @@ class ActionRunner:
         return None
 
     def _find_all_pids_for_process(self, process_substring: str) -> list[int]:
-        """Return all PIDs whose process name OR cmdline contains the substring."""
         lowered = process_substring.lower()
         pids = []
         for process in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
@@ -141,14 +162,7 @@ class ActionRunner:
                 continue
         return pids
 
-    # ── Linux focus ───────────────────────────────────────────────────────────
-
     def _focus_window_linux(self, pid: int) -> bool:
-        """
-        Focus a window on Linux using wmctrl (preferred) or xdotool (fallback).
-        Both tools can target windows by PID.
-        """
-        # Strategy 1: wmctrl -l -p lists all windows with PIDs
         try:
             result = subprocess.run(
                 ["wmctrl", "-l", "-p"],
@@ -157,7 +171,6 @@ class ActionRunner:
             if result.returncode == 0:
                 for line in result.stdout.splitlines():
                     parts = line.split(None, 4)
-                    # format: <wid> <desktop> <pid> <host> <title>
                     if len(parts) >= 3:
                         try:
                             win_pid = int(parts[2])
@@ -176,7 +189,6 @@ class ActionRunner:
         except Exception as e:
             self._log(f"[action] wmctrl error: {e}")
 
-        # Strategy 2: xdotool search --pid then windowactivate
         try:
             result = subprocess.run(
                 ["xdotool", "search", "--pid", str(pid)],
@@ -185,8 +197,6 @@ class ActionRunner:
             if result.returncode == 0:
                 wids = result.stdout.strip().splitlines()
                 if wids:
-                    # Use the last wid — for Electron apps the last one is usually
-                    # the main visible window (earlier ones are background frames)
                     wid = wids[-1]
                     self._log(f"[action] xdotool focus wid={wid} pid={pid}")
                     subprocess.run(
@@ -201,12 +211,9 @@ class ActionRunner:
 
         return False
 
-    # ── Windows focus ─────────────────────────────────────────────────────────
-
     def _find_window_by_title_substring(
         self, title_substring: str, process_substring: str = ""
     ) -> Optional[int]:
-        """Find a visible window by title, optionally constrained to process substring."""
         if win32gui is None:
             return None
         lowered = title_substring.lower()
@@ -245,7 +252,6 @@ class ActionRunner:
         return matched[0][0]
 
     def _focus_window_by_pid(self, pid: int) -> bool:
-        """Focus a window by PID — dispatches to Linux or Windows implementation."""
         if not platform_utils.use_windows_paths():
             return self._focus_window_linux(pid)
 
@@ -281,11 +287,6 @@ class ActionRunner:
             return False
 
     def _collect_windows_for_pids(self, pids: list[int]) -> list[tuple[str, str]]:
-        """
-        Return (window_id_str, title) for every visible titled window
-        belonging to any PID in `pids`.
-        Platform-gated: Windows uses win32gui, Linux uses wmctrl/xdotool.
-        """
         pid_set = {int(pid) for pid in pids}
         if not pid_set:
             return []
@@ -378,10 +379,6 @@ class ActionRunner:
         return windows
 
     def _show_window_picker(self, windows: list[tuple[str, str]]) -> str | None:
-        """
-        Show a blocking Tk popup listing window titles.
-        Returns the selected window_id_str, or None on cancel/error.
-        """
         try:
             import tkinter as tk
 
@@ -459,7 +456,6 @@ class ActionRunner:
             return None
 
     def _focus_window_by_id(self, window_id_str: str) -> bool:
-        """Focus a window by its platform-specific ID string."""
         if platform_utils.use_windows_paths():
             if win32gui is None:
                 return False
@@ -493,12 +489,11 @@ class ActionRunner:
             return False
 
     def _force_foreground(self, hwnd: int) -> None:
-        """Robustly bring a window to foreground, handling the Windows focus-lock."""
         try:
             import ctypes as _ctypes
 
             if win32gui.IsIconic(hwnd):
-                win32gui.ShowWindow(hwnd, 9)  # SW_RESTORE
+                win32gui.ShowWindow(hwnd, 9)
 
             current_thread = _ctypes.windll.kernel32.GetCurrentThreadId()
             target_thread, _ = win32process.GetWindowThreadProcessId(hwnd)
@@ -513,7 +508,7 @@ class ActionRunner:
 
             win32gui.BringWindowToTop(hwnd)
             win32gui.SetForegroundWindow(hwnd)
-            win32gui.ShowWindow(hwnd, 5)  # SW_SHOW
+            win32gui.ShowWindow(hwnd, 5)
 
             if attached:
                 _ctypes.windll.user32.AttachThreadInput(
@@ -522,7 +517,30 @@ class ActionRunner:
         except Exception as exc:
             self._log(f"[action] _force_foreground error: {exc}")
 
-    # ── Main dispatcher ───────────────────────────────────────────────────────
+    def _run_key_combo(self, combo: str) -> None:
+        combo_text = str(combo).strip()
+        if not combo_text:
+            raise RuntimeError("key_combo requires non-empty 'value'")
+        if platform_utils.use_windows_paths():
+            try:
+                import pyautogui
+                keys = [part.strip().lower() for part in combo_text.split("+") if part.strip()]
+                if not keys:
+                    raise RuntimeError("key_combo resolved to no keys")
+                pyautogui.hotkey(*keys)
+                return
+            except Exception as exc:
+                raise RuntimeError(f"key_combo windows failed: {exc}") from exc
+
+        try:
+            subprocess.run(
+                ["xdotool", "key", combo_text],
+                capture_output=True,
+                timeout=3,
+                check=True,
+            )
+        except Exception as exc:
+            raise RuntimeError(f"key_combo linux failed: {exc}") from exc
 
     def _run(self, action: dict[str, Any], source: str, value: int) -> bool:
         action_type = action.get("type", "noop")
@@ -554,7 +572,11 @@ class ActionRunner:
                     platform_utils.run_command(str(action_value))
                 return False
 
-            if action_type == "dictate":
+            if action_type == "key_combo":
+                self._run_key_combo(str(action_value))
+                return False
+
+            if action_type == "dictate" or action_type == "dictate_to_telegram":
                 if self._dictation_service is None:
                     self._log("[action/warn] dictate: DictationService unavailable")
                     return False
@@ -568,7 +590,12 @@ class ActionRunner:
                     input_device=input_device,
                 )
                 if session is not None:
-                    self._dictation_sessions[source] = session
+                    mode = "telegram" if action_type == "dictate_to_telegram" else "inject"
+                    self._dictation_sessions[source] = {
+                        "session": session,
+                        "mode": mode,
+                        "action": action,
+                    }
                 return False
 
             if action_type == "hold_double_click":
@@ -591,7 +618,6 @@ class ActionRunner:
                     self._log("[action/error] focus_or_launch requires 'command'")
                     return False
 
-                # Windows-only: title-based focus for WebCatalog apps
                 if window_title and platform_utils.use_windows_paths():
                     hwnd = self._find_window_by_title_substring(
                         window_title, process_substring
@@ -613,7 +639,6 @@ class ActionRunner:
                     platform_utils.run_command(launch_command)
                     return False
 
-                # Process-based focus (Linux + Windows fallback)
                 all_pids = self._find_all_pids_for_process(process_substring)
                 if all_pids:
                     self._log(f"[action] found {len(all_pids)} pid(s) for '{process_substring}'")
@@ -658,7 +683,7 @@ class ActionRunner:
                 return False
 
             if action_type == "hud":
-                return True  # Handled by caller
+                return False
 
             if action_type == "volume_step":
                 step = int(value)

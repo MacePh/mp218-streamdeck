@@ -118,15 +118,23 @@ class DictationService:
             self._log(f"[dictation] start recording error: {exc}")
             return None
 
-    def stop_and_transcribe(self, session: dict[str, Any]) -> None:
+    def stop_and_transcribe(
+        self,
+        session: dict[str, Any],
+        on_text: Callable[[str], None] | None = None,
+    ) -> None:
         thread = threading.Thread(
             target=self._do_transcribe,
-            args=(session,),
+            args=(session, on_text),
             daemon=True,
         )
         thread.start()
 
-    def _do_transcribe(self, session: dict[str, Any]) -> None:
+    def _do_transcribe(
+        self,
+        session: dict[str, Any],
+        on_text: Callable[[str], None] | None = None,
+    ) -> None:
         temp_path: Path | None = None
         try:
             stream = session.get("stream")
@@ -195,7 +203,10 @@ class DictationService:
 
             elapsed = time.monotonic() - float(session.get("started_at", time.monotonic()))
             self._log(f"[dictation] transcription ready ({elapsed:.2f}s): {text}")
-            self._inject_text(text)
+            if on_text is not None:
+                on_text(text)
+            else:
+                self._inject_text(text)
         except Exception as exc:
             self._log(f"[dictation] transcribe error: {exc}")
         finally:
