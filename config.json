@@ -227,11 +227,8 @@
           "value": "toggle"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -431,11 +428,8 @@
           "value": "toggle"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -625,11 +619,8 @@
           "value": "toggle"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -851,11 +842,8 @@
           "value": "xdg-open \"/www/tickets\""
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "75": {
           "type": "focus_or_launch",
@@ -973,11 +961,8 @@
           "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "75": {
           "type": "dictate",
@@ -1145,11 +1130,8 @@
           "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "79": {
           "type": "dictate_to_telegram",
@@ -1275,11 +1257,8 @@
           "command": "/mnt/ai-models/masterp/StabilityMatrix-linux-x64/StabilityMatrix.AppImage"
         },
         "74": {
-          "type": "dictate_to_telegram",
-          "label": "Talk to Boris",
-          "destination": "BORIS",
-          "model": "base.en",
-          "language": "en"
+          "type": "noop",
+          "value": ""
         },
         "79": {
           "type": "dictate_to_telegram",

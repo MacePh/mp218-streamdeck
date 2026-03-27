@@ -21,6 +21,9 @@
   - `77` = list Boris/OpenClaw threads (`openclaw sessions`)
   - `78` = Boris thread UI (`openclaw tui`)
   - `79` = Talk to Boris (`dictate_to_telegram`)
+- Follow-up cleanup completed:
+  - `74` no longer points to Boris and was cleared to `noop` where it still had the old Boris action.
+  - Verified `79` is Boris across all profiles.
 - This is a practical CLI-driven implementation, not a deep session-API integration.
 
 ## Notes
