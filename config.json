@@ -235,9 +235,12 @@
           "open_in_typora": false
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -447,9 +450,12 @@
           "open_in_typora": false
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -649,9 +655,12 @@
           "open_in_typora": false
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -909,9 +918,12 @@
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -1033,9 +1045,12 @@
           "value": "toggle"
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -1186,9 +1201,12 @@
           "open_in_typora": false
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },
@@ -1319,9 +1337,12 @@
           "open_in_typora": false
         },
         "79": {
-          "type": "dictate_to_telegram",
+          "type": "dictate_to_openclaw",
           "label": "Talk to Boris",
-          "destination": "BORIS",
+          "channel": "telegram",
+          "target": "1636853070",
+          "agent_id": "main",
+          "thinking": "off",
           "model": "base.en",
           "language": "en"
         },

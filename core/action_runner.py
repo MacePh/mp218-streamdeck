@@ -5,6 +5,7 @@ import threading
 
 from core import platform_utils
 from core.markdown_capture import MarkdownCapture
+from core.openclaw_sender import OpenClawSender
 from core.telegram_sender import TelegramSender
 import psutil
 
@@ -51,6 +52,7 @@ class ActionRunner:
         )
         self._hold_double_click_sessions: dict[str, threading.Event] = {}
         self._telegram_sender = TelegramSender(logger=self._log)
+        self._openclaw_sender = OpenClawSender(logger=self._log)
         self._markdown_capture = MarkdownCapture(logger=self._log)
 
     def run_pad_action(self, action: dict[str, Any], note: int, velocity: int) -> bool:
@@ -80,6 +82,12 @@ class ActionRunner:
             self._dictation_service.stop_and_transcribe(
                 session,
                 on_text=lambda text: self._send_transcript_to_telegram(text, action),
+            )
+            return
+        if mode == "openclaw":
+            self._dictation_service.stop_and_transcribe(
+                session,
+                on_text=lambda text: self._send_transcript_to_openclaw(text, action),
             )
             return
         if mode == "markdown_daily":
@@ -113,6 +121,14 @@ class ActionRunner:
             self._log(f"[action] dictated markdown captured: {text}")
         except Exception as exc:
             self._log(f"[action/error] dictate_to_markdown failed: {exc}")
+
+    def _send_transcript_to_openclaw(self, text: str, action: dict[str, Any]) -> None:
+        try:
+            ok = self._openclaw_sender.send_to_boris(text, action)
+            if ok:
+                self._log(f"[action] dictated OpenClaw message sent: {text}")
+        except Exception as exc:
+            self._log(f"[action/error] dictate_to_openclaw failed: {exc}")
 
     def _perform_double_click(self) -> None:
         if platform_utils.use_windows_paths():
@@ -613,7 +629,7 @@ class ActionRunner:
                 self._run_key_combo(str(action_value))
                 return False
 
-            if action_type in ("dictate", "dictate_to_telegram", "dictate_to_markdown"):
+            if action_type in ("dictate", "dictate_to_telegram", "dictate_to_markdown", "dictate_to_openclaw"):
                 if self._dictation_service is None:
                     self._log("[action/warn] dictate: DictationService unavailable")
                     return False
@@ -630,6 +646,8 @@ class ActionRunner:
                     mode = "inject"
                     if action_type == "dictate_to_telegram":
                         mode = "telegram"
+                    elif action_type == "dictate_to_openclaw":
+                        mode = "openclaw"
                     elif action_type == "dictate_to_markdown":
                         mode = "markdown_daily"
                     self._dictation_sessions[source] = {

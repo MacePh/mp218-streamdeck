@@ -283,7 +283,7 @@ class ControlSurfaceApp:
 
         action = self.profile_manager.get_pad_action(note)
         action_type = action.get("type")
-        if action_type in ("dictate", "dictate_to_telegram", "dictate_to_markdown"):
+        if action_type in ("dictate", "dictate_to_telegram", "dictate_to_markdown", "dictate_to_openclaw"):
             self.log(f"[pad] release note={note} type={action_type}")
             self.action_runner.on_dictate_release(note)
         elif action_type == "hold_double_click":

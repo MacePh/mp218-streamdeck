@@ -26,6 +26,7 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
 - Hold-to-talk dictation:
   - `dictate` -> transcribe and type at cursor
   - `dictate_to_telegram` -> transcribe and send to a Telegram chat
+  - `dictate_to_openclaw` -> transcribe and send through OpenClaw to Boris
   - `dictate_to_markdown` -> transcribe and append to a daily markdown note
 - Markdown capture helpers:
   - `new_markdown_doc` -> create a fresh markdown doc and open it in Typora
@@ -178,6 +179,7 @@ Supported action types in pad/knob mappings:
 - `focus_or_launch` - focus running app window or launch it if not running
 - `dictate` - hold pad to record microphone input, release to transcribe and type at cursor
 - `dictate_to_telegram` - hold pad to record microphone input, release to transcribe and send to Telegram
+- `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing
 - `dictate_to_markdown` - hold pad to record microphone input, release to transcribe and append to a daily markdown file
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile

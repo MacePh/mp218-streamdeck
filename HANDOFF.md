@@ -14,7 +14,8 @@
 - `.env` / `.env.example` — Telegram secrets
 
 ## Current status
-- Boris dictation exists as action type `dictate_to_telegram`.
+- Boris dictation now uses `dictate_to_openclaw` for pad 79 so Boris input routes through OpenClaw instead of raw Telegram bot send.
+- Legacy `dictate_to_telegram` still exists in code but is no longer the primary Boris path.
 - Markdown capture actions now exist:
   - `dictate_to_markdown` = hold-to-talk append into daily markdown note
   - `new_markdown_doc` = create standalone markdown file and open in Typora
@@ -23,7 +24,7 @@
   - `74` = daily idea capture in `F:\notes\ideas\YYYY-MM-DD.md`
   - `77` = list Boris/OpenClaw threads (`openclaw sessions`)
   - `78` = Boris thread UI (`openclaw tui`)
-  - `79` = Talk to Boris (`dictate_to_telegram`)
+  - `79` = Talk to Boris (`dictate_to_openclaw`)
 - This is a practical CLI-driven implementation, not a deep session-API integration.
 
 ## Notes
