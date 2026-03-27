@@ -232,6 +232,25 @@
           "destination": "BORIS",
           "model": "base.en",
           "language": "en"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
@@ -417,6 +436,25 @@
           "destination": "BORIS",
           "model": "base.en",
           "language": "en"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
@@ -592,6 +630,25 @@
           "destination": "BORIS",
           "model": "base.en",
           "language": "en"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
@@ -812,19 +869,23 @@
           "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
         },
         "77": {
-          "type": "focus_or_launch",
-          "process": "signal-desktop",
-          "command": "signal-desktop"
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
         },
         "78": {
-          "type": "focus_or_launch",
-          "process": "slack",
-          "command": "slack"
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         },
         "79": {
-          "type": "focus_or_launch",
-          "process": "cursor",
-          "command": "cursor"
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
         },
         "80": {
           "type": "hold_double_click",
@@ -939,6 +1000,25 @@
         "83": {
           "type": "hud",
           "value": "toggle"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
@@ -1070,6 +1150,25 @@
           "destination": "BORIS",
           "model": "base.en",
           "language": "en"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
@@ -1181,6 +1280,25 @@
           "destination": "BORIS",
           "model": "base.en",
           "language": "en"
+        },
+        "79": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Boris",
+          "destination": "BORIS",
+          "model": "base.en",
+          "language": "en"
+        },
+        "77": {
+          "type": "cmd",
+          "label": "List Boris Threads",
+          "value": "openclaw sessions",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+        },
+        "78": {
+          "type": "cmd",
+          "label": "Boris Thread UI",
+          "value": "openclaw tui",
+          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
         }
       },
       "knobs": {
