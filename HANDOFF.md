@@ -18,6 +18,7 @@
 - Extra confirmation added for pad 79:
   - explicit `[boris] ...` log lines
   - desktop popup when transcript is heard/sent (Windows MessageBox, Linux `notify-send`)
+- `openclaw_sender.py` now resolves the real OpenClaw executable path and auto-starts the gateway if it is asleep before retrying delivery.
 - Legacy `dictate_to_telegram` still exists in code but is no longer the primary Boris path.
 - Markdown capture actions now exist:
   - `dictate_to_markdown` = hold-to-talk append into daily markdown note
