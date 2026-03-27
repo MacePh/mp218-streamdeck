@@ -6,7 +6,7 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
 
 ## Highlights
 
-- 3 profiles: `dev`, `ai`, `stream`
+- Config-driven pads/knobs with hot reload
 - Full pad range support (notes `36-83`, Banks A/B/C)
 - LED feedback with:
   - profile idle brightness
@@ -15,7 +15,6 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - diff-based rendering (reduced flicker)
 - Non-blocking press flash restore queue (no loop stall on press)
 - Knob (`control_change`) action support with threshold filtering
-- Hot reload for `config.json` (no restart needed for config edits)
 - MIDI auto-detection for renamed MPD ports
 - Context-aware profile switching on Windows (`Cursor`, `OBS`, `ChatGPT`, `Claude`, `Grok`, etc.)
 - Manual profile override lock to prevent immediate context switch bounce
@@ -24,6 +23,10 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - clickable pads and command palette search
   - last-pressed pad highlight
   - pad/hotkey toggles (`51`, `67`, `83`, `Ctrl+Shift+H`)
+- Hold-to-talk dictation:
+  - `dictate` -> transcribe and type at cursor
+  - `dictate_to_telegram` -> transcribe and send to a Telegram chat
+- `key_combo` action support for desktop shortcuts
 
 ## Project Layout
 
@@ -32,6 +35,7 @@ mpd-streamdeck/
   controller.py
   config.json
   run.ps1
+  .env.example
   core/
     app.py
     config_loader.py
@@ -44,6 +48,7 @@ mpd-streamdeck/
     platform_utils.py
     context_manager.py
     hud_manager.py
+    telegram_sender.py
 ```
 
 ## Requirements
@@ -60,7 +65,7 @@ Core Python packages:
 - `psutil`
 - `pywin32`
 
-Optional packages for push-to-talk dictation (`type: "dictate"`):
+Optional packages for dictation / speech features:
 
 - `faster-whisper`
 - `sounddevice`
@@ -75,6 +80,30 @@ python -m pip install -r requirements.txt
 ```
 
 `faster-whisper` downloads the selected model on first use, then runs local transcription from cache.
+
+## Secrets / Telegram setup
+
+The project now supports a local `.env` file in the repo root. `run.ps1` loads it into the process environment before starting the controller.
+
+Create:
+
+```text
+.env
+```
+
+Example:
+
+```env
+MPD_TELEGRAM_BOT_TOKEN=your_bot_token_here
+MPD_TELEGRAM_CHAT_ID_BORIS=1636853070
+```
+
+Notes:
+- `.env` is gitignored
+- `.env.example` is committed as the template
+- `dictate_to_telegram` can use either:
+  - `chat_id` directly in the action, or
+  - `destination` with an env var like `MPD_TELEGRAM_CHAT_ID_BORIS`
 
 ## Run
 
@@ -110,6 +139,8 @@ Use the user service with host Python so installed dictation dependencies are av
 ExecStart=/usr/bin/python3 /media/masterp/AI-Models/mpd-streamdeck/controller.py --config /media/masterp/AI-Models/mpd-streamdeck/config.json
 ```
 
+If you want Telegram dictation under Linux systemd, add env vars in the service or an EnvironmentFile.
+
 After editing the service:
 
 ```bash
@@ -128,7 +159,7 @@ Use `RUNME.md` for copy/paste day-to-day commands (start, restart, status, logs)
 - The app opens MIDI input/output ports.
 - It polls incoming MIDI events:
   - `note_on` -> pad press actions
-  - `note_off` (and `note_on` with velocity `0`) -> pad release actions (`dictate`)
+  - `note_off` (and `note_on` with velocity `0`) -> pad release actions (`dictate`, `dictate_to_telegram`)
   - `control_change` -> knob actions
 - It renders LEDs for the active profile.
 - It polls `config.json` for changes and hot-reloads safely.
@@ -139,15 +170,20 @@ Use `RUNME.md` for copy/paste day-to-day commands (start, restart, status, logs)
 Supported action types in pad/knob mappings:
 
 - `cmd` - execute shell command
+- `key_combo` - send a desktop key combo
 - `url` - open URL in browser
 - `focus_or_launch` - focus running app window or launch it if not running
 - `dictate` - hold pad to record microphone input, release to transcribe and type at cursor
+- `dictate_to_telegram` - hold pad to record microphone input, release to transcribe and send to Telegram
 - `profile` - switch active profile
 - `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
 - `hud` - toggle the HUD overlay
 - `log` - print debug/log message
+- `restart` - restart the controller process
 - `noop` - no operation
-- `volume_step` - placeholder hook in `platform_utils.py`
+- `hold_double_click` - repeatedly double-click while held
+- `transcribe_stream` - toggle continuous meeting transcription
+- `volume_step`, `media_step`, `brightness_step`, `scroll_step`, `tab_step`, `zoom_step`
 
 ## `config.json` Reference
 
@@ -161,18 +197,6 @@ Top-level sections:
 - `context_profiles`
 - `profiles`
 
-### `config_version`
-
-- `1`: current supported schema version
-
-### `midi`
-
-- `input_port` / `output_port`: expected MPD port names
-- `auto_detect_ports`: if true, fallback matching can recover renamed ports
-- `auto_detect_match`: substring used for port auto-match (default `MPD218`)
-- `pad_channel`: use `9` for hardware channel 10
-- `pad_note_range`: min/max pad notes
-
 ### `controller`
 
 - `default_profile`: startup profile
@@ -184,42 +208,6 @@ Top-level sections:
 - `hud_duration_seconds`: auto-hide timeout for HUD overlay
 - `log_midi_input`: verbose MIDI input logging toggle
 
-### `led`
-
-- `pressed_brightness`: flash brightness on pad press
-- `press_flash_seconds`: flash duration before restore
-- `profile_idle_brightness`: base brightness per profile
-- `bank_brightness_multipliers`: A/B/C relative brightness
-- `indicator_pads`: profile indicator pads
-- `reserved_pads`: pads excluded from macro rendering
-- `animations`: startup/profile-switch animation toggles and timings
-
-### `hud`
-
-- `enabled`: enable/disable HUD system
-- `width`: HUD window width
-- `height`: HUD window height
-- `opacity`: HUD transparency (0-1)
-
-### `context_profiles`
-
-Maps foreground process name substrings (case-insensitive) to profiles.
-First match wins.
-
-Example:
-
-```json
-"context_profiles": {
-  "cursor": "dev",
-  "obs": "stream",
-  "chatgpt": "ai",
-  "claude": "ai",
-  "grok": "ai",
-  "gemini": "ai",
-  "webcatalog": "ai"
-}
-```
-
 ### `profiles`
 
 Each profile has:
@@ -227,48 +215,28 @@ Each profile has:
 - `pads`: map note number strings to actions
 - `knobs`: map CC number strings to actions
 
-Current AI pad examples:
+Example Telegram dictation pad:
 
-- `36`: `focus_or_launch` ChatGPT
-- `37`: `focus_or_launch` Claude
-- `38`: `focus_or_launch` Grok
-- `39`: `cursor`
-- `40`: `focus_or_launch` Chrome (Gemini URL)
-- `41`: `start stabilitymatrix`
+```json
+"74": {
+  "type": "dictate_to_telegram",
+  "label": "Talk to Boris",
+  "destination": "BORIS",
+  "model": "base.en",
+  "language": "en"
+}
+```
 
-Bank C (`68-72`) is configured as a universal launcher bank across all profiles:
+If you prefer explicit targeting instead of named destinations:
 
-- `68`: ChatGPT
-- `69`: Claude
-- `70`: Grok
-- `71`: Cursor
-- `72`: Stability Matrix
-
-HUD toggle pads are mapped in all profiles:
-
-- `51` (Bank A top-right)
-- `67` (Bank B top-right)
-- `83` (Bank C top-right)
-
-If an app command is not in PATH, replace with full executable path.
-
-## Context Switching Notes
-
-- Requires `psutil` and `pywin32`.
-- Uses Windows foreground window process detection.
-- Safe by design: detection failures are ignored (controller loop keeps running).
-- Manual profile switching (pad actions) still works and remains authoritative.
-- After manual profile switching, context auto-switching is temporarily locked for `manual_lock_seconds`.
-- `focus_or_launch` first attempts to focus an existing process; if focus fails, it falls back to launch.
-
-## HUD Notes
-
-- HUD runs in its own thread and does not block the MIDI loop.
-- Grid orientation mirrors hardware layout:
-  - top row is highest notes (`48-51` on Bank A)
-  - bottom row is lowest notes (`36-39` on Bank A)
-- Last pressed pad is highlighted briefly (~300ms).
-- Clicking a HUD pad triggers the same action as physical pad press.
+```json
+"74": {
+  "type": "dictate_to_telegram",
+  "chat_id": "1636853070",
+  "model": "base.en",
+  "language": "en"
+}
+```
 
 ## Troubleshooting
 
@@ -278,17 +246,14 @@ If an app command is not in PATH, replace with full executable path.
 - Dictation logs `missing dependencies: sounddevice/soundfile/numpy`  
   Install dictation deps: `python -m pip install -r requirements.txt`
 
+- `dictate_to_telegram` fails with token/chat errors  
+  Confirm `.env` exists and `run.ps1` is being used, or set the variables in your launcher/service environment.
+
 - MIDI ports fail to open  
   Check available port names and adjust `midi.input_port`/`output_port`, or keep auto-detect enabled.
 
 - Pad LEDs do not respond  
   Confirm output port is correct and `pad_channel` is `9`.
-
-- App command does not launch  
-  Replace `cmd` value with a command available in PATH or full executable path.
-
-- App no longer auto-starts after BIOS/firmware updates  
-  Reinstall the scheduled task: `.\install-autostart.ps1`
 
 - Config change does nothing  
   Validate JSON syntax; invalid reloads are rejected and previous good config stays active.
