@@ -282,10 +282,11 @@ class ControlSurfaceApp:
         assert self.action_runner is not None
 
         action = self.profile_manager.get_pad_action(note)
-        if action.get("type") == "dictate":
-            self.log(f"[pad] release note={note} type=dictate")
+        action_type = action.get("type")
+        if action_type in ("dictate", "dictate_to_telegram"):
+            self.log(f"[pad] release note={note} type={action_type}")
             self.action_runner.on_dictate_release(note)
-        elif action.get("type") == "hold_double_click":
+        elif action_type == "hold_double_click":
             self.log(f"[pad] release note={note} type=hold_double_click")
             self.action_runner.on_hold_double_click_release(note)
 
