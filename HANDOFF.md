@@ -9,35 +9,61 @@
 - `core/app.py` — MIDI press/release flow
 - `core/action_runner.py` — action dispatch
 - `core/dictation_service.py` — hold-to-talk recording/transcription
-- `core/telegram_sender.py` — Telegram send support for Boris dictation
-- `run.ps1` — now loads `.env`
-- `.env` / `.env.example` — Telegram secrets
+- `core/openclaw_sender.py` — Boris input path via OpenClaw
+- `core/boris_voice_sidecar.py` — new Phase 1 desktop voice watcher/speaker
+- `boris_voice_sidecar.py` — simple entrypoint
+- `run-boris-voice.ps1` — Windows launcher for the sidecar
+- `run.ps1` — controller launcher
+- `.env` / `.env.example` — local env support
 
 ## Current status
-- Boris dictation now uses `dictate_to_openclaw` for pad 79 so Boris input routes through OpenClaw instead of raw Telegram bot send.
-- Extra confirmation added for pad 79:
-  - explicit `[boris] ...` log lines
-  - desktop popup when transcript is heard/sent (Windows MessageBox, Linux `notify-send`)
-- `openclaw_sender.py` now resolves the real OpenClaw executable path and auto-starts the gateway if it is asleep before retrying delivery.
-- Legacy `dictate_to_telegram` still exists in code but is no longer the primary Boris path.
-- Markdown capture actions now exist:
-  - `dictate_to_markdown` = hold-to-talk append into daily markdown note
-  - `new_markdown_doc` = create standalone markdown file and open in Typora
-- Current pad cluster across all profiles:
-  - `73` = new markdown doc in `F:\notes\ideas` (opens in Typora)
-  - `74` = daily idea capture in `F:\notes\ideas\YYYY-MM-DD.md`
-  - `77` = list Boris/OpenClaw threads (`openclaw sessions`)
-  - `78` = Boris thread UI (`openclaw tui`)
-  - `79` = Talk to Boris (`dictate_to_openclaw`)
-- This is a practical CLI-driven implementation, not a deep session-API integration.
+- Boris dictation input path remains intact: MPD hold-to-talk -> transcribe -> OpenClaw send.
+- The `Talk to Boris` send path now uses the intended **local OpenClaw main session** instead of the old Telegram direct-delivery route.
+- Added a Boris desktop voice sidecar that uses the local session logs already available on disk:
+  - `C:\Users\theve\.openclaw\agents\main\sessions\*.jsonl`
+  - `C:\Users\theve\.openclaw\agents\main\sessions\sessions.json`
+- The sidecar:
+  - resolves `agent:main:main` through the session index first
+  - watches for new assistant messages
+  - dedupes using a persisted state file
+  - strips reply markers / markdown-ish noise
+  - speaks the full cleaned local Boris reply by default
+  - still supports short summary mode if desired
+  - speaks it locally on Windows with built-in `System.Speech.Synthesis.SpeechSynthesizer`
+- Telegram is no longer part of the primary `Talk to Boris` path.
+
+## How to run
+Controller:
+```powershell
+cd F:\mpd-streamdeck
+.\run.ps1
+```
+
+Voice sidecar:
+```powershell
+cd F:\mpd-streamdeck
+.\run-boris-voice.ps1
+```
+
+One-shot latest unseen reply:
+```powershell
+.\run-boris-voice.ps1 -Once
+```
+
+Optional voice:
+```powershell
+.\run-boris-voice.ps1 -Voice "Microsoft David Desktop"
+```
 
 ## Notes
-- `openclaw sessions` is a clear "list threads" command.
-- There was no obvious simple CLI subcommand found for "create new Boris thread" directly, so `openclaw tui` is used as the nearest practical thread-management entry point.
-- If future work wants true one-button "new Boris thread", inspect newer OpenClaw CLI/session APIs or use a custom action path.
+- Sidecar dedupe state lives at:
+  - `C:\Users\theve\.openclaw\workspace\boris_voice_sidecar_state.json`
+- Default session hint is:
+  - `agent:main:main`
+- No extra TTS dependency was added; Phase 1 uses the shortest reliable built-in Windows path.
 
-## Next steps
-1. Restart controller: `cd F:\mpd-streamdeck && .\restart.ps1`
-2. Test pads 77/78/79 in current Windows profile.
-3. If desired, refine 78 from `openclaw tui` to a more direct Boris/new-session flow once a reliable CLI/API path is identified.
-4. Optionally free/reassign pad 74 now that 79 owns Boris dictation.
+## What remains
+1. Real-world validation against live Boris replies to confirm the session-hint targeting is always correct.
+2. Optionally narrow reply summarization heuristics if spoken summaries feel too long/too terse.
+3. Optional future autostart integration if the sidecar should launch alongside the controller every time.
+4. Optional direct Telegram polling fallback only if local session logs prove unreliable.

@@ -9,8 +9,20 @@ from typing import Callable
 
 from core import platform_utils
 
+try:
+    import psutil
+except Exception:
+    psutil = None  # type: ignore
+
 
 class OpenClawSender:
+    _GATEWAY_PROCESS_HINTS = (
+        "openclaw gateway",
+        "openclaw.cmd gateway",
+        "openclaw.exe gateway",
+        "gateway start",
+    )
+
     def __init__(self, logger: Callable[[str], None]):
         self._log = logger
 
@@ -50,15 +62,42 @@ class OpenClawSender:
 
         raise RuntimeError("OpenClaw CLI not found in PATH or expected npm-global location")
 
+    def _is_gateway_process_running(self) -> bool:
+        if psutil is None:
+            return False
+
+        for process in psutil.process_iter(attrs=["name", "cmdline"]):
+            try:
+                name = (process.info.get("name") or "").lower()
+                cmdline = " ".join(process.info.get("cmdline") or []).lower()
+                haystack = f"{name} {cmdline}"
+                if any(hint in haystack for hint in self._GATEWAY_PROCESS_HINTS):
+                    return True
+            except Exception:
+                continue
+        return False
+
+    def _is_gateway_running_fast(self, openclaw_exe: str) -> bool:
+        if self._is_gateway_process_running():
+            return True
+
+        try:
+            status = subprocess.run(
+                [openclaw_exe, "gateway", "status"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+                check=False,
+            )
+            return status.returncode == 0 and "Runtime: running" in (status.stdout or "")
+        except subprocess.TimeoutExpired:
+            self._log("[openclaw] gateway status probe timed out; treating as unavailable")
+            return False
+        except Exception:
+            return False
+
     def _ensure_gateway_running(self, openclaw_exe: str) -> None:
-        status = subprocess.run(
-            [openclaw_exe, "gateway", "status"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=False,
-        )
-        if status.returncode == 0 and "Runtime: running" in (status.stdout or ""):
+        if self._is_gateway_running_fast(openclaw_exe):
             self._log("[openclaw] gateway already running")
             return
 
@@ -68,22 +107,15 @@ class OpenClawSender:
             [openclaw_exe, "gateway", "start"],
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=20,
             check=False,
         )
         if start.returncode != 0:
             raise RuntimeError(start.stderr.strip() or start.stdout.strip() or "gateway start failed")
 
-        for _ in range(10):
-            time.sleep(1.0)
-            probe = subprocess.run(
-                [openclaw_exe, "gateway", "status"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-                check=False,
-            )
-            if probe.returncode == 0 and "Runtime: running" in (probe.stdout or ""):
+        for _ in range(12):
+            time.sleep(0.5)
+            if self._is_gateway_running_fast(openclaw_exe):
                 self._log("[openclaw] gateway wake-up confirmed")
                 return
 
@@ -95,34 +127,46 @@ class OpenClawSender:
             self._log("[openclaw] skipped empty message")
             return False
 
-        channel = str(action.get("channel", "telegram")).strip() or "telegram"
-        target = str(action.get("target", "1636853070")).strip()
+        channel = str(action.get("channel", "local")).strip() or "local"
+        target = str(action.get("target", "")).strip()
         agent_id = str(action.get("agent_id", "main")).strip() or "main"
         thinking = str(action.get("thinking", "off")).strip() or "off"
         openclaw_exe = self._resolve_openclaw_executable()
 
+        local_mode = channel.lower() in {"local", "webchat", "internal", "desktop"}
         command = [
             openclaw_exe,
             "agent",
             "--agent",
             agent_id,
-            "--channel",
-            channel,
-            "--to",
-            target,
             "--message",
             message,
-            "--deliver",
             "--thinking",
             thinking,
             "--json",
         ]
+        if not local_mode:
+            if not target:
+                raise RuntimeError(f"OpenClaw target is required for non-local channel '{channel}'")
+            command.extend([
+                "--channel",
+                channel,
+                "--to",
+                target,
+                "--deliver",
+            ])
 
         self._log("[boris] heard you — handing transcript to OpenClaw")
         self.notify("Boris", "Heard you. Sending now…")
 
         try:
-            self._ensure_gateway_running(openclaw_exe)
+            send_started = time.monotonic()
+            gateway_ready_elapsed = 0.0
+            if local_mode:
+                self._log("[openclaw] local delivery selected; skipping gateway preflight")
+            else:
+                self._ensure_gateway_running(openclaw_exe)
+                gateway_ready_elapsed = time.monotonic() - send_started
             result = subprocess.run(
                 command,
                 capture_output=True,
@@ -138,7 +182,12 @@ class OpenClawSender:
                     json.loads(raw)
                 except Exception:
                     pass
-            self._log(f"[openclaw] delivered agent message to {channel}:{target}")
+            total_elapsed = time.monotonic() - send_started
+            cli_elapsed = total_elapsed - gateway_ready_elapsed
+            destination = "local session" if local_mode else f"{channel}:{target}"
+            self._log(
+                f"[openclaw] delivered agent message to {destination} gateway={gateway_ready_elapsed:.2f}s cli={cli_elapsed:.2f}s total={total_elapsed:.2f}s"
+            )
             self._log("[boris] delivery accepted by OpenClaw")
             self.notify("Boris", "Got it. Processing…")
             return True

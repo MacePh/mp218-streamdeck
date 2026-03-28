@@ -28,6 +28,12 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - `dictate_to_telegram` -> transcribe and send to a Telegram chat
   - `dictate_to_openclaw` -> transcribe and send through OpenClaw to Boris
   - `dictate_to_markdown` -> transcribe and append to a daily markdown note
+- Optional Boris desktop voice sidecar:
+  - watches local OpenClaw session JSONL logs for new Boris replies
+  - dedupes spoken replies
+  - speaks the full local Boris reply by default
+  - keeps optional summary mode if wanted
+  - speaks it locally on Windows via built-in `System.Speech`
 - Markdown capture helpers:
   - `new_markdown_doc` -> create a fresh markdown doc and open it in Typora
 - `key_combo` action support for desktop shortcuts
@@ -40,8 +46,10 @@ mpd-streamdeck/
   config.json
   run.ps1
   .env.example
+  boris_voice_sidecar.py
   core/
     app.py
+    boris_voice_sidecar.py
     config_loader.py
     midi_manager.py
     led_manager.py
@@ -134,6 +142,28 @@ Direct:
 ```powershell
 python controller.py --config config.json
 ```
+
+### Boris voice sidecar (Phase 1)
+
+This is a separate runtime component. It watches the local OpenClaw main-session logs, dedupes Boris replies, and speaks the full local reply on the Windows desktop by default. The intended path is now fully local: MPD -> OpenClaw main session -> local session log -> desktop speech. If you want the old short spoken behavior, there is also an optional summary mode.
+
+Run it in another terminal:
+
+```powershell
+.\run-boris-voice.ps1
+```
+
+One-shot test for the latest unseen reply:
+
+```powershell
+.\run-boris-voice.ps1 -Once
+```
+
+Notes:
+- Default session hint targets the local Boris main session: `agent:main:main`
+- State/dedupe file: `C:\Users\theve\.openclaw\workspace\boris_voice_sidecar_state.json`
+- Optional voice selection: `.\run-boris-voice.ps1 -Voice "Microsoft David Desktop"`
+- Optional old short-summary mode: `.\run-boris-voice.ps1 -SpeechMode summary`
 
 ### Linux service runtime (dictation-enabled)
 

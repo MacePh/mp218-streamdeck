@@ -180,18 +180,24 @@ class DictationService:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 temp_path = Path(tmp.name)
 
+            write_started = time.monotonic()
             sf.write(str(temp_path), audio, samplerate=samplerate)
+            write_elapsed = time.monotonic() - write_started
 
             model_size = str(session.get("model", "base.en"))
             language = str(session.get("language", "en"))
             model = self._get_model(model_size)
+            transcribe_started = time.monotonic()
             segments, _info = model.transcribe(
                 str(temp_path),
                 language=language,
                 vad_filter=True,
                 condition_on_previous_text=False,
+                beam_size=1,
+                best_of=1,
             )
             text = " ".join(segment.text for segment in segments).strip()
+            transcribe_elapsed = time.monotonic() - transcribe_started
             if not text:
                 self._log("[dictation] no speech detected")
                 return
@@ -202,7 +208,9 @@ class DictationService:
                 return
 
             elapsed = time.monotonic() - float(session.get("started_at", time.monotonic()))
-            self._log(f"[dictation] transcription ready ({elapsed:.2f}s): {text}")
+            self._log(
+                f"[dictation] transcription ready total={elapsed:.2f}s capture={duration_seconds:.2f}s wav={write_elapsed:.2f}s whisper={transcribe_elapsed:.2f}s: {text}"
+            )
             if on_text is not None:
                 on_text(text)
             else:
