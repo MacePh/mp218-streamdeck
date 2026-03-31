@@ -2,7 +2,9 @@ from typing import Any, Callable
 from typing import Optional
 import subprocess
 import threading
+import time
 
+from core import openclaw_env
 from core import platform_utils
 from core.markdown_capture import MarkdownCapture
 from core.openclaw_sender import OpenClawSender
@@ -47,6 +49,8 @@ class ActionRunner:
         self._dictation_service = (
             DictationService(logger=self._log) if DictationService else None
         )
+        if self._dictation_service is not None:
+            self._dictation_service.prewarm("large-v3")
         self._transcriber = (
             MeetingTranscriber(logger=self._log) if MeetingTranscriber else None
         )
@@ -65,7 +69,10 @@ class ActionRunner:
         source = f"pad:{note}"
         entry = self._dictation_sessions.pop(source, None)
         if entry is None:
-            self._log(f"[action] dictate release: no active session for {source}")
+            self._log(
+                f"[action] dictate release: no active session for {source} "
+                "(press may have failed to open the mic, or release without press)"
+            )
             return
         if self._dictation_service is None:
             return
@@ -558,6 +565,39 @@ class ActionRunner:
         except Exception as exc:
             self._log(f"[action] _force_foreground error: {exc}")
 
+    def _run_openclaw_smart_startup(self, action: dict[str, Any]) -> None:
+        try:
+            self._openclaw_sender.ensure_gateway_running()
+            self._log("[openclaw/env] gateway: ready")
+        except Exception as exc:
+            self._log(f"[openclaw/env] gateway: {exc}")
+            self._openclaw_sender.notify("OpenClaw", str(exc))
+            return
+
+        try:
+            self._openclaw_sender.open_control_dashboard()
+        except Exception as exc:
+            self._log(f"[openclaw/env] dashboard: {exc}")
+            self._openclaw_sender.notify("OpenClaw", f"Dashboard: {exc}")
+
+        try:
+            openclaw_env.ensure_clawcommand_running(action, self._log)
+        except Exception as exc:
+            self._log(f"[openclaw/env] ClawCommand start error: {exc}")
+
+        url = str(action.get("clawcommand_url", "http://127.0.0.1:4310")).strip()
+        if url:
+            time.sleep(0.8)
+            if not platform_utils.open_url_in_firefox(url):
+                self._log("[openclaw/env] Firefox not found; using default browser for ClawCommand")
+                platform_utils.open_url(url)
+
+        if not openclaw_env.is_openclaw_tui_running():
+            self._log("[openclaw/env] starting openclaw tui")
+            openclaw_env.start_openclaw_tui(self._log)
+        else:
+            self._log("[openclaw/env] openclaw tui already running")
+
     def _run_key_combo(self, combo: str) -> None:
         combo_text = str(combo).strip()
         if not combo_text:
@@ -613,6 +653,10 @@ class ActionRunner:
                     platform_utils.run_command(str(action_value))
                 return False
 
+            if action_type == "openclaw_smart_startup":
+                self._run_openclaw_smart_startup(action)
+                return False
+
             if action_type == "new_markdown_doc":
                 directory = str(action.get("path", "")).strip()
                 if not directory:
@@ -657,6 +701,11 @@ class ActionRunner:
                         "mode": mode,
                         "action": action,
                     }
+                else:
+                    self._log(
+                        "[action/warn] dictate: recording did not start — see [dictation] lines "
+                        "(missing pip deps, mic/PortAudio, or faster-whisper)"
+                    )
                 return False
 
             if action_type == "hold_double_click":

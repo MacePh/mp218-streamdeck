@@ -1,4 +1,4 @@
-# mp218-streamdeck
+# mpd-streamdeck
 
 Config-driven Akai MPD218 control surface for Windows and Linux, built with Python.
 
@@ -37,6 +37,7 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
 - Markdown capture helpers:
   - `new_markdown_doc` -> create a fresh markdown doc and open it in Typora
 - `key_combo` action support for desktop shortcuts
+- OpenClaw / Boris environment (pad **77** in default profiles): `openclaw_smart_startup` ensures the gateway is up (start only if down), opens the Control UI via `openclaw dashboard`, brings up [ClawCommand](http://127.0.0.1:4310) in Firefox when possible, and starts `openclaw tui` only if no TUI process is already running
 
 ## Project Layout
 
@@ -61,6 +62,8 @@ mpd-streamdeck/
     context_manager.py
     hud_manager.py
     telegram_sender.py
+    openclaw_sender.py
+    openclaw_env.py
 ```
 
 ## Requirements
@@ -209,8 +212,9 @@ Supported action types in pad/knob mappings:
 - `focus_or_launch` - focus running app window or launch it if not running
 - `dictate` - hold pad to record microphone input, release to transcribe and type at cursor
 - `dictate_to_telegram` - hold pad to record microphone input, release to transcribe and send to Telegram
-- `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing (with extra local confirmation and gateway wake-up)
+- `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing (local delivery skips gateway preflight; non-local channels wake the gateway if needed)
 - `dictate_to_markdown` - hold pad to record microphone input, release to transcribe and append to a daily markdown file
+- `openclaw_smart_startup` - one-press “smart” environment: ensure OpenClaw gateway running (no restart when healthy), open Control UI (`openclaw dashboard` — tokenized/auth handoff per OpenClaw docs), ensure ClawCommand server is listening (optional `clawcommand_dir_*`), open ClawCommand URL in Firefox (fallback: default browser), start `openclaw tui` in a new terminal only when not already running
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile
 - `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
@@ -263,6 +267,29 @@ Example Telegram dictation pad:
   "language": "en"
 }
 ```
+
+### `openclaw_smart_startup` (typical pad **77**)
+
+Gateway auth and dashboard URLs are **not** duplicated in `config.json`. Set `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`) in OpenClaw on the gateway host; the CLI’s `openclaw dashboard` is the supported way to open an authenticated Control UI. See [OpenClaw Dashboard](https://docs.openclaw.ai/web/dashboard).
+
+Optional fields:
+
+- `clawcommand_url` — default `http://127.0.0.1:4310`
+- `clawcommand_dir` / `clawcommand_dir_windows` / `clawcommand_dir_linux` — project directory used to run `npm start` when the URL is not reachable
+- `clawcommand_start_cmd` / `clawcommand_start_cmd_windows` / `clawcommand_start_cmd_linux` — override the start command
+
+Example:
+
+```json
+"77": {
+  "type": "openclaw_smart_startup",
+  "label": "OpenClaw env (smart)",
+  "clawcommand_url": "http://127.0.0.1:4310",
+  "clawcommand_dir_windows": "F:\\ClawCommand"
+}
+```
+
+On Linux-only profiles, add `clawcommand_dir_linux` (or `clawcommand_dir`) if you want the controller to start ClawCommand automatically when the port is closed.
 
 If you prefer explicit targeting instead of named destinations:
 

@@ -7,9 +7,10 @@
 ## Relevant files
 - `config.json` — pad/knob mappings
 - `core/app.py` — MIDI press/release flow
-- `core/action_runner.py` — action dispatch
+- `core/action_runner.py` — action dispatch (includes `openclaw_smart_startup`)
+- `core/openclaw_env.py` — ClawCommand probe/start, `openclaw tui` detection/spawn
 - `core/dictation_service.py` — hold-to-talk recording/transcription
-- `core/openclaw_sender.py` — Boris input path via OpenClaw
+- `core/openclaw_sender.py` — Boris input via OpenClaw; gateway ensure; `openclaw dashboard` Control UI
 - `core/boris_voice_sidecar.py` — new Phase 1 desktop voice watcher/speaker
 - `boris_voice_sidecar.py` — simple entrypoint
 - `run-boris-voice.ps1` — Windows launcher for the sidecar
@@ -17,6 +18,7 @@
 - `.env` / `.env.example` — local env support
 
 ## Current status
+- **Pad 77** (`openclaw_smart_startup`): smart startup for OpenClaw + ClawCommand + TUI — gateway start only if down, `openclaw dashboard` for Control UI, Firefox (or fallback) for ClawCommand URL, new TUI terminal only if none running.
 - Boris dictation input path remains intact: MPD hold-to-talk -> transcribe -> OpenClaw send.
 - The `Talk to Boris` send path now uses the intended **local OpenClaw main session** instead of the old Telegram direct-delivery route.
 - Added a Boris desktop voice sidecar that uses the local session logs already available on disk:

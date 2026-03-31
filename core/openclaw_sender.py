@@ -121,6 +121,21 @@ class OpenClawSender:
 
         raise RuntimeError("Gateway start requested but runtime never reported running")
 
+    def ensure_gateway_running(self) -> None:
+        """Start the gateway only when status/probes say it is down (no restart when healthy)."""
+        openclaw_exe = self._resolve_openclaw_executable()
+        self._ensure_gateway_running(openclaw_exe)
+
+    def open_control_dashboard(self) -> None:
+        """Open the OpenClaw Control UI via the official CLI (tokenized URL / browser handoff)."""
+        openclaw_exe = self._resolve_openclaw_executable()
+        self._log("[openclaw] opening Control UI (openclaw dashboard)")
+        subprocess.Popen(
+            [openclaw_exe, "dashboard"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
     def send_to_boris(self, text: str, action: dict) -> bool:
         message = str(text).strip()
         if not message:

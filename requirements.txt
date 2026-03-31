@@ -13,6 +13,7 @@ soundfile
 pywin32; platform_system == "Windows"
 pyperclip; platform_system == "Windows"
 pyautogui; platform_system == "Windows"
+pywinauto>=0.6.8; platform_system == "Windows"
 keyboard; platform_system == "Linux"
 
 # Boris voice sidecar uses built-in Windows speech (no extra package needed)

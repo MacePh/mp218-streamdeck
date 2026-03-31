@@ -61,6 +61,31 @@ class ActionRunnerDictateTests(unittest.TestCase):
         self.assertEqual(len(fake.calls), 1)
         self.assertIsNone(fake.calls[0]["input_device"])
 
+    def test_dictate_warns_when_recording_does_not_start(self) -> None:
+        logs: list[str] = []
+
+        class _NoopDictation:
+            def start_recording(self, **_kw: object) -> None:
+                return None
+
+        runner = ActionRunner(
+            logger=lambda msg: logs.append(msg),
+            on_profile_change=lambda _name: None,
+            on_toggle_flag=lambda _name: False,
+        )
+        runner._dictation_service = _NoopDictation()
+
+        runner.run_pad_action(
+            {"type": "dictate", "model": "base.en", "language": "en"},
+            note=75,
+            velocity=127,
+        )
+
+        self.assertTrue(
+            any("recording did not start" in m for m in logs),
+            f"expected warn in logs, got {logs!r}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

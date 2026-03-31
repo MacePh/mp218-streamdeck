@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import subprocess
 import time
 import queue
 import sys
@@ -16,6 +17,19 @@ from core.led_manager import LEDManager
 from core.midi_manager import MidiManager
 from core.profile_manager import ProfileManager
 from core.state_manager import StateManager
+
+# Reserved indicator pads still run profile/hud/restart/dictation actions when mapped in JSON.
+_RESERVED_PAD_ALLOWED_TYPES = frozenset(
+    {
+        "profile",
+        "hud",
+        "restart",
+        "dictate",
+        "dictate_to_telegram",
+        "dictate_to_markdown",
+        "dictate_to_openclaw",
+    }
+)
 
 
 class ControlSurfaceApp:
@@ -50,7 +64,15 @@ class ControlSurfaceApp:
         )
         cfg = os.path.abspath(self.config_path)
         self.log(f"[app] exec restart: {controller_path} --config {cfg}")
-        os.execv(sys.executable, [sys.executable, controller_path, "--config", cfg])
+        argv = [sys.executable, controller_path, "--config", cfg]
+        if os.name == "nt":
+            subprocess.Popen(
+                argv,
+                cwd=os.path.dirname(controller_path),
+                close_fds=False,
+            )
+            os._exit(0)
+        os.execv(sys.executable, argv)
 
     def _bank_for_note(self, note: int) -> str:
         if 36 <= note <= 51:
@@ -252,8 +274,8 @@ class ControlSurfaceApp:
             self.refresh_hud()
             return
 
-        if note in reserved and action.get("type") not in ("profile", "hud"):
-            self.log(f"[pad] note {note} is reserved; ignoring non-profile action")
+        if note in reserved and action.get("type") not in _RESERVED_PAD_ALLOWED_TYPES:
+            self.log(f"[pad] note {note} is reserved; ignored action type={action.get('type')!r}")
             return
 
         self.led.send_note_on(note, self.led.pressed_brightness)

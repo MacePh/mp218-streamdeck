@@ -3,7 +3,7 @@
   "action_type_examples": {
     "dictate": {
       "type": "dictate",
-      "model": "base.en",
+      "model": "large-v3",
       "language": "en"
     }
   },
@@ -201,7 +201,7 @@
         },
         "75": {
           "type": "dictate",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "76": {
@@ -230,7 +230,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -240,14 +240,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -415,7 +415,7 @@
         },
         "75": {
           "type": "dictate",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "76": {
@@ -444,7 +444,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -454,14 +454,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -619,7 +619,7 @@
         },
         "75": {
           "type": "dictate",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "76": {
@@ -648,7 +648,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -658,14 +658,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -887,7 +887,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -903,10 +903,10 @@
           "value_windows": "cmd /c start \"\" cmd /k \"cd /d F:\\fluxgym && call fluxgym_venv\\Scripts\\activate.bat && python app.py\""
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -920,7 +920,7 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "80": {
@@ -1014,13 +1014,13 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
         "75": {
           "type": "dictate",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "input_device": "pulse"
         },
@@ -1046,14 +1046,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -1191,7 +1191,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -1201,14 +1201,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",
@@ -1326,7 +1326,7 @@
           "type": "dictate_to_markdown",
           "label": "Daily Idea",
           "path": "F:\\notes\\ideas",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en",
           "open_in_typora": false
         },
@@ -1336,14 +1336,14 @@
           "channel": "local",
           "agent_id": "main",
           "thinking": "off",
-          "model": "base.en",
+          "model": "large-v3",
           "language": "en"
         },
         "77": {
-          "type": "cmd",
-          "label": "List Boris Threads",
-          "value": "openclaw sessions",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw sessions\""
+          "type": "openclaw_smart_startup",
+          "label": "OpenClaw env (smart)",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
           "type": "cmd",

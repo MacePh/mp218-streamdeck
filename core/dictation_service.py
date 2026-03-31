@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import Any, Callable
 import subprocess
 import sys
-import tempfile
 import threading
 import time
-from pathlib import Path
+
+from core import platform_utils
 
 try:
     import numpy as np
@@ -40,6 +40,10 @@ class DictationService:
     def __init__(self, logger: Callable[[str], None]):
         self._log = logger
         self._model_cache: dict[str, Any] = {}
+        self._prewarm_model: str | None = None
+        self._session_counter = 0
+        self._session_lock = threading.Lock()
+        self._latest_session_id = 0
 
     @staticmethod
     def _normalize_text(text: str) -> str:
@@ -53,15 +57,38 @@ class DictationService:
             return False
         return audio_rms <= self._LOW_ENERGY_SHORT_TEXT_RMS
 
+    def prewarm(self, model_size: str = "large-v3") -> None:
+        """Load the model in a background thread so the first pad press is instant."""
+        self._prewarm_model = model_size
+        threading.Thread(
+            target=self._do_prewarm,
+            args=(model_size,),
+            daemon=True,
+            name="dictation-prewarm",
+        ).start()
+
+    def _do_prewarm(self, model_size: str) -> None:
+        try:
+            self._log(f"[dictation] pre-warming model '{model_size}'...")
+            self._get_model(model_size)
+            self._log(f"[dictation] pre-warm complete for '{model_size}'")
+        except Exception as exc:
+            self._log(f"[dictation] pre-warm failed: {exc}")
+
     def _get_model(self, model_size: str) -> Any:
         if WhisperModel is None:
             raise RuntimeError("faster_whisper is not installed")
         if model_size not in self._model_cache:
             self._log(f"[dictation] loading model '{model_size}'...")
+            import torch as _torch  # local import, only used here
+
+            _device = "cuda" if _torch.cuda.is_available() else "cpu"
+            _compute = "float16" if _device == "cuda" else "int8"
+            self._log(f"[dictation] using device={_device} compute={_compute}")
             self._model_cache[model_size] = WhisperModel(
                 model_size,
-                device="cpu",
-                compute_type="int8",
+                device=_device,
+                compute_type=_compute,
             )
             self._log(f"[dictation] model '{model_size}' ready")
         return self._model_cache[model_size]
@@ -79,6 +106,11 @@ class DictationService:
             self._log("[dictation] missing dependency: faster-whisper")
             return None
 
+        with self._session_lock:
+            self._session_counter += 1
+            session_id = self._session_counter
+            self._latest_session_id = session_id
+
         session: dict[str, Any] = {
             "audio_data": [],
             "stream": None,
@@ -86,6 +118,8 @@ class DictationService:
             "model": model,
             "language": language,
             "started_at": time.monotonic(),
+            "session_id": session_id,
+            "target_hwnd": platform_utils.capture_foreground_window() if sys.platform == "win32" else 0,
         }
 
         try:
@@ -106,6 +140,14 @@ class DictationService:
             if input_device is not None and str(input_device).strip() != "":
                 stream_kwargs["device"] = input_device
                 self._log(f"[dictation] using input device: {input_device}")
+            else:
+                try:
+                    default_in = sd.default.device[0]
+                    info = sd.query_devices(default_in)
+                    name = str(info.get("name", "?"))
+                    self._log(f"[dictation] default input device index={default_in} name={name!r}")
+                except Exception as exc:
+                    self._log(f"[dictation] could not query default input device: {exc}")
 
             stream = sd.InputStream(
                 **stream_kwargs,
@@ -135,7 +177,6 @@ class DictationService:
         session: dict[str, Any],
         on_text: Callable[[str], None] | None = None,
     ) -> None:
-        temp_path: Path | None = None
         try:
             stream = session.get("stream")
             if stream is not None:
@@ -177,27 +218,28 @@ class DictationService:
                 )
                 return
 
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-                temp_path = Path(tmp.name)
-
-            write_started = time.monotonic()
-            sf.write(str(temp_path), audio, samplerate=samplerate)
-            write_elapsed = time.monotonic() - write_started
-
-            model_size = str(session.get("model", "base.en"))
+            model_size = str(session.get("model", "large-v3"))
             language = str(session.get("language", "en"))
+            session_id = int(session.get("session_id", 0))
+
+            model_started = time.monotonic()
             model = self._get_model(model_size)
-            transcribe_started = time.monotonic()
+            model_elapsed = time.monotonic() - model_started
+
+            transcribe_call_started = time.monotonic()
             segments, _info = model.transcribe(
-                str(temp_path),
+                audio,
                 language=language,
                 vad_filter=True,
                 condition_on_previous_text=False,
                 beam_size=1,
                 best_of=1,
             )
+            transcribe_call_elapsed = time.monotonic() - transcribe_call_started
+
+            decode_started = time.monotonic()
             text = " ".join(segment.text for segment in segments).strip()
-            transcribe_elapsed = time.monotonic() - transcribe_started
+            decode_elapsed = time.monotonic() - decode_started
             if not text:
                 self._log("[dictation] no speech detected")
                 return
@@ -206,36 +248,32 @@ class DictationService:
                     f"[dictation] suppressed likely hallucination ({duration_seconds:.2f}s, rms={audio_rms:.4f}): {text}"
                 )
                 return
+            if self._is_stale_session(session_id):
+                self._log(f"[dictation] dropped stale transcript session={session_id}: {text}")
+                return
 
             elapsed = time.monotonic() - float(session.get("started_at", time.monotonic()))
             self._log(
-                f"[dictation] transcription ready total={elapsed:.2f}s capture={duration_seconds:.2f}s wav={write_elapsed:.2f}s whisper={transcribe_elapsed:.2f}s: {text}"
+                f"[dictation] transcription ready total={elapsed:.2f}s capture={duration_seconds:.2f}s model={model_elapsed:.2f}s whisper_call={transcribe_call_elapsed:.2f}s decode={decode_elapsed:.2f}s: {text}"
             )
             if on_text is not None:
                 on_text(text)
             else:
-                self._inject_text(text)
+                self._inject_text(text, target_hwnd=int(session.get("target_hwnd", 0) or 0))
         except Exception as exc:
             self._log(f"[dictation] transcribe error: {exc}")
-        finally:
-            if temp_path is not None:
-                try:
-                    temp_path.unlink(missing_ok=True)
-                except Exception:
-                    pass
 
-    def _inject_text(self, text: str) -> None:
+    def _is_stale_session(self, session_id: int) -> bool:
+        with self._session_lock:
+            return session_id != self._latest_session_id
+
+    def _inject_text(self, text: str, target_hwnd: int = 0) -> None:
         if not text:
             return
         if sys.platform == "win32":
             try:
-                import pyautogui
-                import pyperclip
-
-                original = pyperclip.paste()
-                pyperclip.copy(text)
-                pyautogui.hotkey("ctrl", "v")
-                threading.Timer(1.0, lambda: pyperclip.copy(original)).start()
+                strategy = platform_utils.send_text_windows(text, target_hwnd=target_hwnd)
+                self._log(f"[dictation] windows text injection via {strategy}")
             except Exception as exc:
                 self._log(f"[dictation] text injection error (win32): {exc}")
             return

@@ -93,7 +93,14 @@ class MeetingTranscriber:
         if self._model: return True
         try:
             self._log(f"[transcriber] loading Whisper '{self._model_size}' …")
-            self._model = WhisperModel(self._model_size, device="cpu", compute_type="int8")
+            try:
+                import torch as _torch
+                _device = "cuda" if _torch.cuda.is_available() else "cpu"
+            except ImportError:
+                _device = "cpu"
+            _compute = "float16" if _device == "cuda" else "int8"
+            self._log(f"[transcriber] using device={_device} compute={_compute}")
+            self._model = WhisperModel(self._model_size, device=_device, compute_type=_compute)
             self._log("[transcriber] model ready")
             return True
         except Exception as e:

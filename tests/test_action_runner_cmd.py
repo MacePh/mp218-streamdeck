@@ -1,3 +1,4 @@
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -6,7 +7,7 @@ from core.action_runner import ActionRunner
 
 
 class ActionRunnerCmdTests(unittest.TestCase):
-    @patch.object(action_runner_mod.sys, "platform", "win32")
+    @patch.object(sys, "platform", "win32")
     @patch.object(action_runner_mod.platform_utils, "run_command")
     def test_cmd_uses_value_windows_on_windows(self, mock_run: MagicMock) -> None:
         runner = ActionRunner(
@@ -25,7 +26,7 @@ class ActionRunnerCmdTests(unittest.TestCase):
         )
         mock_run.assert_called_once_with("windows-cmd")
 
-    @patch.object(action_runner_mod.sys, "platform", "linux")
+    @patch.object(sys, "platform", "linux")
     @patch.object(action_runner_mod.platform_utils, "run_command")
     def test_cmd_uses_value_when_not_windows(self, mock_run: MagicMock) -> None:
         runner = ActionRunner(
@@ -44,7 +45,7 @@ class ActionRunnerCmdTests(unittest.TestCase):
         )
         mock_run.assert_called_once_with("linux-cmd")
 
-    @patch.object(action_runner_mod.sys, "platform", "msys")
+    @patch.object(sys, "platform", "msys")
     @patch.object(action_runner_mod.platform_utils, "run_command")
     def test_cmd_uses_value_windows_on_msys(self, mock_run: MagicMock) -> None:
         runner = ActionRunner(

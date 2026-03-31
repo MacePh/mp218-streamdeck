@@ -93,3 +93,13 @@ Run once (creates **Restart MPD Streamdeck** on your Desktop):
 
 `config.json` hot-reloads automatically while running.  
 If behavior seems stuck, run a service/app restart using the commands above.
+
+## OpenClaw pad (77) prerequisites
+
+If you use **`openclaw_smart_startup`** (default pad 77):
+
+- [OpenClaw CLI](https://docs.openclaw.ai/start/openclaw) on `PATH` (`openclaw`, `openclaw gateway`, `openclaw dashboard`, `openclaw tui`).
+- **Firefox** if you want ClawCommand to open there; otherwise the action falls back to the default browser.
+- **ClawCommand**: set `clawcommand_dir_windows` / `clawcommand_dir_linux` in the action so the controller can run `npm start` when `clawcommand_url` is not reachable.
+
+Control UI auth: configure the gateway token in OpenClaw (`gateway.auth.token` or `OPENCLAW_GATEWAY_TOKEN`); do not store it in `config.json`. See [Dashboard / token basics](https://docs.openclaw.ai/web/dashboard).
