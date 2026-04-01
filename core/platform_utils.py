@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 import webbrowser
 import ctypes
 import ctypes.wintypes
@@ -35,6 +35,7 @@ INPUT_KEYBOARD     = 1
 
 CF_UNICODETEXT = 13
 GMEM_MOVEABLE = 0x0002
+GA_ROOT = 2
 
 # SendInput expects sizeof(INPUT) to match the Win32 union (keyboard vs mouse).
 # A keyboard-only struct is smaller on x64 and can cause SendInput to misread events.
@@ -119,6 +120,29 @@ def _paste_ctrl_v() -> None:
         user32.keybd_event(vk, 0, KEYEVENTF_KEYUP, 0)
 
 
+def _paste_ctrl_v_with_foreground_thread_input() -> None:
+    """AttachInput to the foreground window's thread so Ctrl+V targets the active caret (Electron/Cursor)."""
+    if os.name != "nt":
+        _paste_ctrl_v()
+        return
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    fg = user32.GetForegroundWindow()
+    cur_tid = kernel32.GetCurrentThreadId()
+    if not fg or not cur_tid:
+        _paste_ctrl_v()
+        return
+    fg_tid = user32.GetWindowThreadProcessId(fg, None)
+    attached = False
+    if fg_tid and int(fg_tid) != int(cur_tid):
+        attached = bool(user32.AttachThreadInput(cur_tid, fg_tid, True))
+    try:
+        _paste_ctrl_v()
+    finally:
+        if attached:
+            user32.AttachThreadInput(cur_tid, fg_tid, False)
+
+
 def _iter_utf16_code_units(text: str) -> list[int]:
     encoded = text.encode("utf-16-le")
     return [int.from_bytes(encoded[index:index + 2], "little") for index in range(0, len(encoded), 2)]
@@ -126,6 +150,20 @@ def _iter_utf16_code_units(text: str) -> list[int]:
 
 def _get_foreground_window() -> int:
     return int(ctypes.windll.user32.GetForegroundWindow())
+
+
+def _root_hwnd(hwnd: int) -> int:
+    """Top-level (root) ancestor — compare these when child HWNDs differ for one window."""
+    if not hwnd:
+        return 0
+    h = ctypes.windll.user32.GetAncestor(int(hwnd), GA_ROOT)
+    return int(h) if h else int(hwnd)
+
+
+def _hwnd_same_top_level(a: int, b: int) -> bool:
+    if not a or not b:
+        return False
+    return _root_hwnd(a) == _root_hwnd(b)
 
 
 def _wait_for_foreground_window(timeout_seconds: float = 0.5, poll_interval_seconds: float = 0.02) -> int:
@@ -294,7 +332,7 @@ def paste_text_via_clipboard(text: str, restore_delay_seconds: float = 0.15) -> 
 
     _set_clipboard_unicode_text(text)
     time.sleep(0.06)
-    _paste_ctrl_v()
+    _paste_ctrl_v_with_foreground_thread_input()
     time.sleep(max(0.0, restore_delay_seconds))
 
     if had_clipboard_text:
@@ -303,6 +341,75 @@ def paste_text_via_clipboard(text: str, restore_delay_seconds: float = 0.15) -> 
         except Exception:
             pass
     return True
+
+
+def _uia_textpattern_reselect_caret(target_hwnd: int, log: Callable[[str], None] | None = None) -> None:
+    """Call TextPattern selection.Select() on the focused node (Document/Edit).
+
+    Cursor, VS Code, and Chromium expose a Text pattern on the focused editor.
+    Re-selecting the UIA range re-affirms keyboard focus at the caret before
+    synthetic Ctrl+V, which otherwise often lands in the wrong thread/window.
+    """
+    if os.name != "nt" or not target_hwnd:
+        return
+
+    def _trace(msg: str) -> None:
+        if log is not None:
+            log(f"[dictation/injection] {msg}")
+
+    pythoncom: Any = None
+    com_initialized = False
+    try:
+        import pythoncom as _pythoncom
+
+        pythoncom = _pythoncom
+        _pythoncom.CoInitialize()
+        com_initialized = True
+    except Exception as exc:
+        _trace(f"caret reselect: COM init {exc!r}")
+
+    try:
+        from pywinauto.controls.uiawrapper import UIAWrapper
+        from pywinauto.uia_defines import IUIA, NoPatternInterfaceError
+        from pywinauto.uia_element_info import UIAElementInfo
+
+        focused = IUIA().get_focused_element()
+        if focused is None:
+            _trace("caret reselect: no focused UIA element")
+            return
+        wrap = UIAWrapper(UIAElementInfo(focused))
+        try:
+            top = wrap.top_level_parent()
+        except Exception as exc:
+            _trace(f"caret reselect: top_level_parent {exc!r}")
+            return
+        top_h = int(top.handle)
+        if not _hwnd_same_top_level(top_h, target_hwnd):
+            _trace(
+                f"caret reselect: skip (focus root {_root_hwnd(top_h)} != target root {_root_hwnd(target_hwnd)})"
+            )
+            return
+        try:
+            iface_text = wrap.iface_text
+        except NoPatternInterfaceError:
+            _trace("caret reselect: no TextPattern on focused control")
+            return
+        sel_array = iface_text.GetSelection()
+        n = int(sel_array.Length)
+        if n < 1:
+            _trace("caret reselect: GetSelection returned no ranges")
+            return
+        rng = sel_array.GetElement(0)
+        rng.Select()
+        _trace(f"caret reselect: TextPattern range.Select() ok (n_ranges={n})")
+    except Exception as exc:
+        _trace(f"caret reselect: {exc!r}")
+    finally:
+        if com_initialized and pythoncom is not None:
+            try:
+                pythoncom.CoUninitialize()
+            except Exception:
+                pass
 
 
 def _restore_foreground_with_retries(hwnd: int, attempts: int = 3, retry_delay_seconds: float = 0.07) -> bool:
@@ -315,7 +422,11 @@ def _restore_foreground_with_retries(hwnd: int, attempts: int = 3, retry_delay_s
     return False
 
 
-def _try_pywinauto_insert_at_focus(text: str, target_hwnd: int) -> bool:
+def _try_pywinauto_insert_at_focus(
+    text: str,
+    target_hwnd: int,
+    log: Callable[[str], None] | None = None,
+) -> bool:
     """Insert text at the keyboard caret via UI Automation (ValuePattern).
 
     Uses pywinauto (Microsoft UI Automation) so we avoid SendInput/UIPI issues
@@ -327,6 +438,10 @@ def _try_pywinauto_insert_at_focus(text: str, target_hwnd: int) -> bool:
     if os.name != "nt" or not text.strip() or not target_hwnd:
         return False
 
+    def _trace(msg: str) -> None:
+        if log is not None:
+            log(f"[dictation/injection] {msg}")
+
     pythoncom: Any = None
     com_initialized = False
     try:
@@ -335,34 +450,53 @@ def _try_pywinauto_insert_at_focus(text: str, target_hwnd: int) -> bool:
         pythoncom = _pythoncom
         _pythoncom.CoInitialize()
         com_initialized = True
-    except Exception:
-        pass
+    except Exception as exc:
+        _trace(f"COM CoInitialize skipped or failed: {exc!r}")
 
     try:
         from pywinauto.controls.uia_controls import EditWrapper
         from pywinauto.controls.uiawrapper import UIAWrapper
         from pywinauto.uia_defines import IUIA
         from pywinauto.uia_element_info import UIAElementInfo
-    except ImportError:
+    except ImportError as exc:
+        _trace(f"pywinauto import failed: {exc!r}")
         return False
 
     try:
         focused = IUIA().get_focused_element()
         if focused is None:
+            _trace("UIA GetFocusedElement returned None after focus restore")
             return False
         wrap = UIAWrapper(UIAElementInfo(focused))
+        try:
+            ct = wrap.element_info.control_type
+            cname = wrap.element_info.class_name
+        except Exception:
+            ct, cname = "?", "?"
         if not isinstance(wrap, EditWrapper):
+            _trace(
+                f"focused control is not UIA Edit (type={ct!r} class={cname!r}); "
+                "try TextPattern reselect + clipboard paste (Cursor/VS Code/Electron)"
+            )
             return False
         try:
             top = wrap.top_level_parent()
-        except Exception:
+        except Exception as exc:
+            _trace(f"top_level_parent failed: {exc!r}")
             return False
-        if int(top.handle) != int(target_hwnd):
+        top_h = int(top.handle)
+        if not _hwnd_same_top_level(top_h, target_hwnd):
+            _trace(
+                f"focus root hwnd={_root_hwnd(top_h)} target root={_root_hwnd(target_hwnd)} "
+                f"(raw top={top_h} target={target_hwnd}) — mismatch"
+            )
             return False
         start, end = wrap.selection_indices()
         wrap.set_edit_text(text, pos_start=start, pos_end=end)
+        _trace(f"pywinauto Edit insert ok (chars={len(text)}, sel=[{start},{end}])")
         return True
-    except Exception:
+    except Exception as exc:
+        _trace(f"pywinauto insert error: {exc!r}")
         return False
     finally:
         if com_initialized and pythoncom is not None:
@@ -372,7 +506,12 @@ def _try_pywinauto_insert_at_focus(text: str, target_hwnd: int) -> bool:
                 pass
 
 
-def send_text_windows(text: str, target_hwnd: int | None = None) -> str:
+def send_text_windows(
+    text: str,
+    target_hwnd: int | None = None,
+    *,
+    log: Callable[[str], None] | None = None,
+) -> str:
     """Send text to the intended Windows app.
 
     Plain dictation often finishes a moment after the user releases the pad, so
@@ -386,9 +525,11 @@ def send_text_windows(text: str, target_hwnd: int | None = None) -> str:
     resolved_target = int(target_hwnd or 0)
     if resolved_target:
         restored = _restore_foreground_with_retries(resolved_target)
-        time.sleep(0.04)
-        if _try_pywinauto_insert_at_focus(text, resolved_target):
+        time.sleep(0.12)
+        if _try_pywinauto_insert_at_focus(text, resolved_target, log=log):
             return "uia-restored" if restored else "uia-fallback"
+        _uia_textpattern_reselect_caret(resolved_target, log=log)
+        time.sleep(0.04)
         if restored:
             paste_text_via_clipboard(text)
             return "clipboard-restored"

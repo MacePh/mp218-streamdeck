@@ -272,7 +272,11 @@ class DictationService:
             return
         if sys.platform == "win32":
             try:
-                strategy = platform_utils.send_text_windows(text, target_hwnd=target_hwnd)
+                strategy = platform_utils.send_text_windows(
+                    text,
+                    target_hwnd=target_hwnd,
+                    log=self._log,
+                )
                 self._log(f"[dictation] windows text injection via {strategy}")
             except Exception as exc:
                 self._log(f"[dictation] text injection error (win32): {exc}")

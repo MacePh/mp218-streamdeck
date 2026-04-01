@@ -55,7 +55,11 @@ class DictationServiceTests(unittest.TestCase):
         ) as send_text_windows:
             self.service._inject_text("hello", target_hwnd=321)
 
-        send_text_windows.assert_called_once_with("hello", target_hwnd=321)
+        send_text_windows.assert_called_once_with(
+            "hello",
+            target_hwnd=321,
+            log=self.service._log,
+        )
         self.assertIn("[dictation] windows text injection via clipboard-restored", self.messages)
 
 
