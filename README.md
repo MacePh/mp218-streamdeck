@@ -218,6 +218,12 @@ Supported action types in pad/knob mappings:
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile
 - `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
+
+## Current note on Bank C 81/82
+
+- Bank C buttons **81** and **82** have been temporarily removed from the active Windows and Linux dev/ai/stream profiles.
+- They are no longer mapped as profile-switch buttons in those active profiles.
+- This is intentional so those two pads can be repurposed cleanly for new behavior.
 - `hud` - toggle the HUD overlay
 - `log` - print debug/log message
 - `restart` - restart the controller process

@@ -19,6 +19,7 @@
 
 ## Current status
 - **Pad 77** (`openclaw_smart_startup`): smart startup for OpenClaw + ClawCommand + TUI — gateway start only if down, `openclaw dashboard` for Control UI, Firefox (or fallback) for ClawCommand URL, new TUI terminal only if none running.
+- **Bank C pads 81 and 82**: temporarily removed from the active Windows/Linux dev/ai/stream profiles so they can be repurposed for new actions.
 - Boris dictation input path remains intact: MPD hold-to-talk -> transcribe -> OpenClaw send.
 - The `Talk to Boris` send path now uses the intended **local OpenClaw main session** instead of the old Telegram direct-delivery route.
 - Added a Boris desktop voice sidecar that uses the local session logs already available on disk:

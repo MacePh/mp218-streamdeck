@@ -214,14 +214,6 @@
           "type": "hold_double_click",
           "rate_hz": 3
         },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
-        },
         "83": {
           "type": "hud",
           "value": "toggle"
@@ -428,14 +420,6 @@
           "type": "hold_double_click",
           "rate_hz": 3
         },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
-        },
         "83": {
           "type": "hud",
           "value": "toggle"
@@ -631,14 +615,6 @@
         "80": {
           "type": "hold_double_click",
           "rate_hz": 3
-        },
-        "81": {
-          "type": "profile",
-          "value": "dev"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai"
         },
         "83": {
           "type": "hud",
@@ -1028,14 +1004,6 @@
           "type": "hold_double_click",
           "rate_hz": 3
         },
-        "81": {
-          "type": "profile",
-          "value": "dev_linux"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai_linux"
-        },
         "83": {
           "type": "hud",
           "value": "toggle"
@@ -1168,14 +1136,6 @@
           "process": "pygpt",
           "command": "/mnt/ai-models/software/launch-pygpt.sh"
         },
-        "81": {
-          "type": "profile",
-          "value": "dev_linux"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai_linux"
-        },
         "83": {
           "type": "hud",
           "value": "toggle"
@@ -1302,14 +1262,6 @@
           "type": "focus_or_launch",
           "process": "pygpt",
           "command": "/mnt/ai-models/software/launch-pygpt.sh"
-        },
-        "81": {
-          "type": "profile",
-          "value": "dev_linux"
-        },
-        "82": {
-          "type": "profile",
-          "value": "ai_linux"
         },
         "83": {
           "type": "hud",
