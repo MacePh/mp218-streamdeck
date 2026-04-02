@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import time
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -53,6 +54,7 @@ class BorisVoiceSidecar:
         self.max_sentences = max(1, int(max_sentences))
         self.max_chars = max(80, int(max_chars))
         self._state = self._load_state()
+        self._last_error_signature = ""
 
     def _load_state(self) -> dict:
         if self.state_file.exists():
@@ -151,10 +153,15 @@ class BorisVoiceSidecar:
         cleaned = cleaned.replace("•", ", ")
         cleaned = cleaned.replace("—", " - ")
         cleaned = cleaned.replace("–", " - ")
+        cleaned = cleaned.replace("↔", " left or right ")
+        cleaned = cleaned.replace("→", " to ")
+        cleaned = cleaned.replace("←", " from ")
         cleaned = cleaned.replace("…", "...")
         cleaned = cleaned.replace("“", '"').replace("”", '"')
         cleaned = cleaned.replace("’", "'").replace("‘", "'")
         cleaned = cleaned.replace("�", "")
+        cleaned = unicodedata.normalize("NFKD", cleaned)
+        cleaned = cleaned.encode("ascii", "ignore").decode("ascii")
         cleaned = WHITESPACE_RE.sub(" ", cleaned).strip()
         return cleaned
 
@@ -266,10 +273,15 @@ class BorisVoiceSidecar:
         while True:
             try:
                 self.run_once()
+                self._last_error_signature = ""
             except KeyboardInterrupt:
                 raise
             except Exception as exc:
-                self._log(f"[boris-voice] watcher error: {exc}")
+                signature = f"{type(exc).__name__}:{exc}"
+                if signature != self._last_error_signature:
+                    safe_signature = unicodedata.normalize("NFKD", signature).encode("ascii", "ignore").decode("ascii")
+                    self._log(f"[boris-voice] watcher error: {safe_signature}")
+                    self._last_error_signature = signature
             time.sleep(self.poll_seconds)
 
 

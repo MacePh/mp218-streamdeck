@@ -26,8 +26,21 @@ Thumbs.db
 *.AppImage
 build/
 dist/
+coverage/
+htmlcov/
+
+# Logs and runtime artifacts
+*.log
+*.tmp
+*.pid
+*.sqlite3
 
 # Local secrets
 .env
 .env.*
 !.env.example
+
+# Local assistant/runtime state
+*.local.json
+*.local.yaml
+*.local.yml
