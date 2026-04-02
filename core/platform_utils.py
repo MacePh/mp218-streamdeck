@@ -37,6 +37,31 @@ CF_UNICODETEXT = 13
 GMEM_MOVEABLE = 0x0002
 GA_ROOT = 2
 
+
+def _configure_windows_clipboard_ctypes() -> None:
+    """Use pointer-sized restypes for Global* / clipboard APIs (default c_int truncates on x64)."""
+    if os.name != "nt":
+        return
+    k32 = ctypes.windll.kernel32
+    k32.GlobalAlloc.argtypes = (ctypes.wintypes.UINT, ctypes.c_size_t)
+    k32.GlobalAlloc.restype = ctypes.c_void_p
+    k32.GlobalLock.argtypes = (ctypes.c_void_p,)
+    k32.GlobalLock.restype = ctypes.c_void_p
+    k32.GlobalUnlock.argtypes = (ctypes.c_void_p,)
+    k32.GlobalUnlock.restype = ctypes.wintypes.BOOL
+    k32.GlobalSize.argtypes = (ctypes.c_void_p,)
+    k32.GlobalSize.restype = ctypes.c_size_t
+    k32.GlobalFree.argtypes = (ctypes.c_void_p,)
+    k32.GlobalFree.restype = ctypes.c_void_p
+    u32 = ctypes.windll.user32
+    u32.GetClipboardData.argtypes = (ctypes.wintypes.UINT,)
+    u32.GetClipboardData.restype = ctypes.c_void_p
+    u32.SetClipboardData.argtypes = (ctypes.wintypes.UINT, ctypes.c_void_p)
+    u32.SetClipboardData.restype = ctypes.c_void_p
+
+
+_configure_windows_clipboard_ctypes()
+
 # SendInput expects sizeof(INPUT) to match the Win32 union (keyboard vs mouse).
 # A keyboard-only struct is smaller on x64 and can cause SendInput to misread events.
 _ULONG_PTR = getattr(ctypes.wintypes, "ULONG_PTR", ctypes.c_size_t)
@@ -150,6 +175,34 @@ def _iter_utf16_code_units(text: str) -> list[int]:
 
 def _get_foreground_window() -> int:
     return int(ctypes.windll.user32.GetForegroundWindow())
+
+
+def _process_exe_lower_for_hwnd(hwnd: int) -> str:
+    """Lowercase exe name (e.g. cursor.exe) for the process owning this HWND, or ""."""
+    if not hwnd or os.name != "nt":
+        return ""
+    try:
+        import psutil
+
+        pid = ctypes.wintypes.DWORD()
+        ctypes.windll.user32.GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
+        if not pid.value:
+            return ""
+        return str(psutil.Process(int(pid.value)).name()).lower()
+    except Exception:
+        return ""
+
+
+# Electron / VS Code family: ValuePattern.set_edit_text often reports success on the wrong
+# UIA Edit or updates a buffer Monaco never displays; clipboard + Ctrl+V is reliable.
+_SKIP_UIA_VALUE_SETVALUE_EXE = frozenset(
+    {
+        "cursor.exe",
+        "code.exe",
+        "code - insiders.exe",
+        "codium.exe",
+    }
+)
 
 
 def _root_hwnd(hwnd: int) -> int:
@@ -280,12 +333,18 @@ def _get_clipboard_unicode_text() -> str | None:
         handle = ctypes.windll.user32.GetClipboardData(CF_UNICODETEXT)
         if not handle:
             return ""
+        size = int(ctypes.windll.kernel32.GlobalSize(handle))
+        if size < 2:
+            return ""
         locked = ctypes.windll.kernel32.GlobalLock(handle)
         if not locked:
             return ""
-        return ctypes.wstring_at(locked)
+        nbytes = size - (size % 2)
+        raw = ctypes.string_at(locked, nbytes)
+        text = raw.decode("utf-16-le", errors="replace").split("\x00", 1)[0]
+        return text
     finally:
-        if locked:
+        if locked and handle:
             ctypes.windll.kernel32.GlobalUnlock(handle)
         ctypes.windll.user32.CloseClipboard()
 
@@ -329,7 +388,6 @@ def paste_text_via_clipboard(text: str, restore_delay_seconds: float = 0.15) -> 
     _wait_for_foreground_window()
     original_text = _get_clipboard_unicode_text()
     had_clipboard_text = original_text is not None
-
     _set_clipboard_unicode_text(text)
     time.sleep(0.06)
     _paste_ctrl_v_with_foreground_thread_input()
@@ -489,6 +547,13 @@ def _try_pywinauto_insert_at_focus(
             _trace(
                 f"focus root hwnd={_root_hwnd(top_h)} target root={_root_hwnd(target_hwnd)} "
                 f"(raw top={top_h} target={target_hwnd}) — mismatch"
+            )
+            return False
+        exe = _process_exe_lower_for_hwnd(top_h)
+        if exe in _SKIP_UIA_VALUE_SETVALUE_EXE:
+            _trace(
+                f"skip UIA ValuePattern insert for {exe!r} "
+                "(Electron/editor shell — use clipboard path)"
             )
             return False
         start, end = wrap.selection_indices()

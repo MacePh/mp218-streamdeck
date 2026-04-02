@@ -1,4 +1,5 @@
 import ctypes
+import sys
 import unittest
 from unittest import mock
 
@@ -93,6 +94,35 @@ class PlatformUtilsTests(unittest.TestCase):
 
         paste_text.assert_called_once_with("hello")
         self.assertEqual(strategy, "clipboard")
+
+    def test_get_clipboard_unicode_text_reads_bounded_global_size(self) -> None:
+        """Avoid ctypes.wstring_at on CF_UNICODETEXT (can AV if block is not NUL-terminated)."""
+        fake_windll = mock.Mock()
+        fake_windll.user32.OpenClipboard.return_value = 1
+        fake_windll.user32.CloseClipboard.return_value = 1
+        fake_windll.user32.IsClipboardFormatAvailable.return_value = 1
+        fake_windll.user32.GetClipboardData.return_value = 99
+        fake_windll.kernel32.GlobalSize.return_value = 6
+        fake_windll.kernel32.GlobalLock.return_value = 4096
+        fake_windll.kernel32.GlobalUnlock.return_value = 1
+
+        hi_utf16 = "hi".encode("utf-16-le") + b"\x00\x00"
+        self.assertEqual(len(hi_utf16), 6)
+
+        with mock.patch.object(platform_utils.ctypes, "windll", fake_windll), mock.patch(
+            "core.platform_utils.ctypes.string_at", return_value=hi_utf16
+        ) as string_at:
+            out = platform_utils._get_clipboard_unicode_text()
+
+        self.assertEqual(out, "hi")
+        string_at.assert_called_once()
+        self.assertEqual(string_at.call_args[0][1], 6)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows-only clipboard prototypes")
+    def test_clipboard_global_lock_is_pointer_sized(self) -> None:
+        """Regression: default ctypes c_int truncates GlobalLock on 64-bit, causing false 'GlobalLock failed'."""
+        self.assertIs(ctypes.windll.kernel32.GlobalLock.restype, ctypes.c_void_p)
+        self.assertIs(ctypes.windll.kernel32.GlobalAlloc.restype, ctypes.c_void_p)
 
 
 if __name__ == "__main__":
