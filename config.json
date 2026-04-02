@@ -253,6 +253,13 @@
           "path": "F:\\notes\\ideas",
           "title": "Untitled Idea",
           "open_in_typora": true
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
@@ -459,6 +466,13 @@
           "path": "F:\\notes\\ideas",
           "title": "Untitled Idea",
           "open_in_typora": true
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
@@ -655,6 +669,13 @@
           "path": "F:\\notes\\ideas",
           "title": "Untitled Idea",
           "open_in_typora": true
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
@@ -908,8 +929,11 @@
           "value": "dev"
         },
         "82": {
-          "type": "profile",
-          "value": "ai"
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         },
         "83": {
           "type": "hud",
@@ -1028,6 +1052,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
@@ -1175,6 +1206,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
@@ -1302,6 +1340,13 @@
           "label": "Boris Thread UI",
           "value": "openclaw tui",
           "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+        },
+        "82": {
+          "type": "dictate_to_telegram",
+          "label": "Talk to Hermes",
+          "chat_id": "1636853070",
+          "model": "large-v3",
+          "language": "en"
         }
       },
       "knobs": {
