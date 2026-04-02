@@ -19,9 +19,12 @@
 
 ## Current status
 - **Pad 77** (`openclaw_smart_startup`): smart startup for OpenClaw + ClawCommand + TUI — gateway start only if down, `openclaw dashboard` for Control UI, Firefox (or fallback) for ClawCommand URL, new TUI terminal only if none running.
-- **Bank C pads 81 and 82**: temporarily removed from the active Windows/Linux dev/ai/stream profiles so they can be repurposed for new actions.
+- **Pad 79** (`dictate_to_openclaw`): `Talk to Boris` remains the local OpenClaw path — hold to record, release to transcribe, then send into the local OpenClaw main session (`agent_id: main`, `channel: local`).
+- **Pad 82** (`dictate_to_telegram`): `Talk to Hermes` now routes dictated text into the current Hermes Telegram DM. This is configured directly in `config.json` with chat id `1636853070` across the active Windows/Linux dev/ai/stream-style profiles.
+- **Bank C reserved pads**: 81/82/83 remain reserved indicator pads at the LED layer, but 82 is now intentionally repurposed for a reserved hold-to-talk action. Functionally it works because reserved pads still allow dictate-style actions.
 - Boris dictation input path remains intact: MPD hold-to-talk -> transcribe -> OpenClaw send.
 - The `Talk to Boris` send path now uses the intended **local OpenClaw main session** instead of the old Telegram direct-delivery route.
+- The `Talk to Hermes` path is currently Telegram-mediated rather than a direct local Hermes CLI/API integration.
 - Added a Boris desktop voice sidecar that uses the local session logs already available on disk:
   - `C:\Users\theve\.openclaw\agents\main\sessions\*.jsonl`
   - `C:\Users\theve\.openclaw\agents\main\sessions\sessions.json`
@@ -34,6 +37,7 @@
   - still supports short summary mode if desired
   - speaks it locally on Windows with built-in `System.Speech.Synthesis.SpeechSynthesizer`
 - Telegram is no longer part of the primary `Talk to Boris` path.
+- Telegram is now only used for the MPD `Talk to Hermes` button path.
 
 ## How to run
 Controller:
@@ -67,6 +71,8 @@ Optional voice:
 
 ## What remains
 1. Real-world validation against live Boris replies to confirm the session-hint targeting is always correct.
-2. Optionally narrow reply summarization heuristics if spoken summaries feel too long/too terse.
-3. Optional future autostart integration if the sidecar should launch alongside the controller every time.
-4. Optional direct Telegram polling fallback only if local session logs prove unreliable.
+2. Real-world validation of pad 82 against the live Hermes Telegram DM path (mic -> transcription -> Telegram bot send -> Hermes reply here).
+3. Optionally replace the current Telegram-mediated Hermes route with a more direct local Hermes integration later if/when that becomes worth the effort.
+4. Optionally narrow reply summarization heuristics if spoken summaries feel too long/too terse.
+5. Optional future autostart integration if the sidecar should launch alongside the controller every time.
+6. Optional direct Telegram polling fallback only if local session logs prove unreliable.

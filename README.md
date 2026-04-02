@@ -28,6 +28,9 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - `dictate_to_telegram` -> transcribe and send to a Telegram chat
   - `dictate_to_openclaw` -> transcribe and send through OpenClaw to Boris
   - `dictate_to_markdown` -> transcribe and append to a daily markdown note
+- Current high-value pad routing in active profiles:
+  - pad `79` -> `Talk to Boris` via local OpenClaw (`dictate_to_openclaw`)
+  - pad `82` -> `Talk to Hermes` via the current Hermes Telegram DM (`dictate_to_telegram`)
 - Optional Boris desktop voice sidecar:
   - watches local OpenClaw session JSONL logs for new Boris replies
   - dedupes spoken replies
@@ -217,13 +220,18 @@ Supported action types in pad/knob mappings:
 - `openclaw_smart_startup` - one-press “smart” environment: ensure OpenClaw gateway running (no restart when healthy), open Control UI (`openclaw dashboard` — tokenized/auth handoff per OpenClaw docs), ensure ClawCommand server is listening (optional `clawcommand_dir_*`), open ClawCommand URL in Firefox (fallback: default browser), start `openclaw tui` in a new terminal only when not already running
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile
+
+Reserved-pad note:
+- Pads `81`, `82`, and `83` are LED-reserved indicator pads, but the app still allows reserved pads to run dictate-style actions. That is why pad `82` can be used for `Talk to Hermes` while still living in the reserved bank.
 - `toggle_flag` - toggle a runtime status flag (`obs_recording`, `mic_muted`, `docker_running`)
 
 ## Current note on Bank C 81/82
 
-- Bank C buttons **81** and **82** have been temporarily removed from the active Windows and Linux dev/ai/stream profiles.
-- They are no longer mapped as profile-switch buttons in those active profiles.
-- This is intentional so those two pads can be repurposed cleanly for new behavior.
+- Button `79` is the current `Talk to Boris` hold-to-talk route.
+- Button `82` is the current `Talk to Hermes` hold-to-talk route.
+- Button `82` now uses `dictate_to_telegram` and sends to the current Hermes Telegram DM.
+- `81` is no longer used as the old profile-switch partner for `82` in the active Windows/Linux dev/ai/stream profiles.
+- This layout is intentional so Boris and Hermes each have a dedicated hold-to-talk pad.
 - `hud` - toggle the HUD overlay
 - `log` - print debug/log message
 - `restart` - restart the controller process
