@@ -19,7 +19,7 @@
 
 ## Current status
 - **Pad 77** (`openclaw_smart_startup`): smart startup for OpenClaw + ClawCommand + TUI — gateway start only if down, `openclaw dashboard` for Control UI, Firefox (or fallback) for ClawCommand URL, new TUI terminal only if none running.
-- **Pad 78** (`openclaw_smart_startup` + companion launch): now mirrors the Boris smart-start path and then focuses or launches Telegram Desktop so Hermes is up too with one press.
+- **Pad 78** (`focus_or_launch`): Hermes-only launcher — focuses Telegram Desktop if already running, otherwise launches it.
 - **Pad 79** (`dictate_to_openclaw`): `Talk to Boris` remains the local OpenClaw path — hold to record, release to transcribe, then send into the local OpenClaw main session (`agent_id: main`, `channel: local`).
 - **Pad 82** (`dictate_to_telegram`): `Talk to Hermes` now routes dictated text into the current Hermes Telegram DM. This is configured directly in `config.json` with chat id `1636853070` across the active Windows/Linux dev/ai/stream-style profiles.
 - **Bank C reserved pads**: 81/82/83 remain reserved indicator pads at the LED layer, but 82 is now intentionally repurposed for a reserved hold-to-talk action. Functionally it works because reserved pads still allow dictate-style actions.
@@ -38,7 +38,7 @@
   - still supports short summary mode if desired
   - speaks it locally on Windows with built-in `System.Speech.Synthesis.SpeechSynthesizer`
 - Telegram is no longer part of the primary `Talk to Boris` path.
-- Telegram is now used both for the MPD `Talk to Hermes` button path and as the Hermes companion app opened/focused by pad `78`.
+- Telegram is now used both for the MPD `Hermes env` launcher on pad `78` and for the `Talk to Hermes` button path on pad `82`.
 
 ## How to run
 Controller:
@@ -72,7 +72,7 @@ Optional voice:
 
 ## What remains
 1. Real-world validation against live Boris replies to confirm the session-hint targeting is always correct.
-2. Real-world validation of pad 78 to confirm the Boris startup + Telegram Desktop focus feels right in live use.
+2. Real-world validation of pad 78 to confirm Hermes launch/focus behavior feels right in live use.
 3. Real-world validation of pad 82 against the live Hermes Telegram DM path (mic -> transcription -> Telegram bot send -> Hermes reply here).
 4. Optionally replace the current Telegram-mediated Hermes route with a more direct local Hermes integration later if/when that becomes worth the effort.
 5. Optionally narrow reply summarization heuristics if spoken summaries feel too long/too terse.

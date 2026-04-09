@@ -242,14 +242,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "73": {
           "type": "new_markdown_doc",
@@ -459,14 +456,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "73": {
           "type": "new_markdown_doc",
@@ -666,14 +660,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "73": {
           "type": "new_markdown_doc",
@@ -918,14 +909,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "79": {
           "type": "dictate_to_openclaw",
@@ -1064,14 +1052,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "82": {
           "type": "dictate_to_telegram",
@@ -1222,14 +1207,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "82": {
           "type": "dictate_to_telegram",
@@ -1360,14 +1342,11 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "openclaw_smart_startup",
-          "label": "Boris + Hermes env",
-          "clawcommand_url": "http://127.0.0.1:4310",
-          "clawcommand_dir_windows": "F:\\ClawCommand",
-          "companion_name": "Hermes",
-          "companion_process": "telegram",
-          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-          "companion_command_linux": "telegram-desktop"
+          "type": "focus_or_launch",
+          "label": "Hermes env",
+          "process": "telegram",
+          "command": "telegram-desktop",
+          "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
         },
         "82": {
           "type": "dictate_to_telegram",

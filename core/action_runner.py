@@ -598,24 +598,6 @@ class ActionRunner:
         else:
             self._log("[openclaw/env] openclaw tui already running")
 
-        companion_process = str(action.get("companion_process", "")).strip().lower()
-        companion_window_title = str(action.get("companion_window_title", "")).strip()
-        if platform_utils.use_windows_paths() and action.get("companion_command_windows"):
-            companion_command = str(action["companion_command_windows"]).strip()
-        elif not platform_utils.use_windows_paths() and action.get("companion_command_linux"):
-            companion_command = str(action["companion_command_linux"]).strip()
-        else:
-            companion_command = str(action.get("companion_command", "")).strip()
-
-        if companion_process or companion_window_title or companion_command:
-            companion_name = str(action.get("companion_name", "Companion")).strip() or "Companion"
-            self._log(f"[openclaw/env] companion launch/focus: {companion_name}")
-            self._run_focus_or_launch(
-                process_substring=companion_process,
-                window_title=companion_window_title,
-                launch_command=companion_command,
-            )
-
     def _run_focus_or_launch(
         self,
         *,

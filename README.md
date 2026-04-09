@@ -29,7 +29,7 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - `dictate_to_openclaw` -> transcribe and send through OpenClaw to Boris
   - `dictate_to_markdown` -> transcribe and append to a daily markdown note
 - Current high-value pad routing in active profiles:
-  - pad `78` -> `Boris + Hermes env` via `openclaw_smart_startup` + Telegram Desktop focus/launch for Hermes
+  - pad `78` -> `Hermes env` via `focus_or_launch` for Telegram Desktop
   - pad `79` -> `Talk to Boris` via local OpenClaw (`dictate_to_openclaw`)
   - pad `82` -> `Talk to Hermes` via the current Hermes Telegram DM (`dictate_to_telegram`)
 - Optional Boris desktop voice sidecar:
@@ -42,7 +42,7 @@ This project turns an MPD218 into a profile-aware macro controller with LED feed
   - `new_markdown_doc` -> create a fresh markdown doc and open it in Typora
 - `key_combo` action support for desktop shortcuts
 - OpenClaw / Boris environment (pad **77** in default profiles): `openclaw_smart_startup` ensures the gateway is up (start only if down), opens the Control UI via `openclaw dashboard`, brings up [ClawCommand](http://127.0.0.1:4310) in Firefox when possible, and starts `openclaw tui` only if no TUI process is already running
-- Combined Boris + Hermes launcher (pad **78** in active profiles): the same `openclaw_smart_startup` action can optionally focus or launch a companion app after Boris is up; current config uses that to bring up Telegram Desktop for Hermes
+- Hermes launcher (pad **78** in active profiles): `focus_or_launch` brings Telegram Desktop to the front if it is already running, otherwise launches it
 
 ## Project Layout
 
@@ -219,7 +219,7 @@ Supported action types in pad/knob mappings:
 - `dictate_to_telegram` - hold pad to record microphone input, release to transcribe and send to Telegram
 - `dictate_to_openclaw` - hold pad to record microphone input, release to transcribe and send through OpenClaw/Boris routing (local delivery skips gateway preflight; non-local channels wake the gateway if needed)
 - `dictate_to_markdown` - hold pad to record microphone input, release to transcribe and append to a daily markdown file
-- `openclaw_smart_startup` - one-press “smart” environment: ensure OpenClaw gateway running (no restart when healthy), open Control UI (`openclaw dashboard` — tokenized/auth handoff per OpenClaw docs), ensure ClawCommand server is listening (optional `clawcommand_dir_*`), open ClawCommand URL in Firefox (fallback: default browser), start `openclaw tui` in a new terminal only when not already running, and optionally focus/launch a companion app afterward (used for Hermes / Telegram on pad `78`)
+- `openclaw_smart_startup` - one-press “smart” environment: ensure OpenClaw gateway running (no restart when healthy), open Control UI (`openclaw dashboard` — tokenized/auth handoff per OpenClaw docs), ensure ClawCommand server is listening (optional `clawcommand_dir_*`), open ClawCommand URL in Firefox (fallback: default browser), start `openclaw tui` in a new terminal only when not already running
 - `new_markdown_doc` - create a new markdown document and optionally open it in Typora
 - `profile` - switch active profile
 
@@ -229,8 +229,8 @@ Reserved-pad note:
 
 ## Current note on Bank C 81/82
 
-- Button `78` is now the current `Boris + Hermes env` one-press launcher.
-- Button `78` reuses the Boris smart startup path and then focuses or launches Telegram Desktop so Hermes is up too.
+- Button `78` is now the current `Hermes env` one-press launcher.
+- Button `78` focuses Telegram Desktop if it is already open, or launches it if it is not.
 - Button `79` is the current `Talk to Boris` hold-to-talk route.
 - Button `82` is the current `Talk to Hermes` hold-to-talk route.
 - Button `82` now uses `dictate_to_telegram` and sends to the current Hermes Telegram DM.
@@ -295,10 +295,6 @@ Optional fields:
 - `clawcommand_url` — default `http://127.0.0.1:4310`
 - `clawcommand_dir` / `clawcommand_dir_windows` / `clawcommand_dir_linux` — project directory used to run `npm start` when the URL is not reachable
 - `clawcommand_start_cmd` / `clawcommand_start_cmd_windows` / `clawcommand_start_cmd_linux` — override the start command
-- `companion_name` — optional label used in logs/notifications for a follow-on companion app
-- `companion_process` — process substring used to find/focus an already-running companion app
-- `companion_window_title` — optional Windows-only title substring for exact companion window matching
-- `companion_command` / `companion_command_windows` / `companion_command_linux` — command used to launch the companion app when it is not already running
 
 Example:
 
@@ -311,18 +307,15 @@ Example:
 }
 ```
 
-Pad `78` uses the same action with a Hermes companion launch:
+Pad `78` is now a separate Hermes-only launcher:
 
 ```json
 "78": {
-  "type": "openclaw_smart_startup",
-  "label": "Boris + Hermes env",
-  "clawcommand_url": "http://127.0.0.1:4310",
-  "clawcommand_dir_windows": "F:\\ClawCommand",
-  "companion_name": "Hermes",
-  "companion_process": "telegram",
-  "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-  "companion_command_linux": "telegram-desktop"
+  "type": "focus_or_launch",
+  "label": "Hermes env",
+  "process": "telegram",
+  "command": "telegram-desktop",
+  "command_windows": "\"C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\""
 }
 ```
 

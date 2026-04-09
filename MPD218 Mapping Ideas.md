@@ -1,6 +1,6 @@
 MPD218 Mapping Ideas.
 
-**Implemented in `config.json` (reference):** pad 77 → `openclaw_smart_startup` (OpenClaw env); 78 → `openclaw_smart_startup` + Hermes companion launch/focus in Telegram Desktop; 79 → Talk to Boris (`dictate_to_openclaw`). Details: `README.md`.
+**Implemented in `config.json` (reference):** pad 77 → `openclaw_smart_startup` (OpenClaw env); 78 → `focus_or_launch` for Telegram Desktop (`Hermes env`); 79 → Talk to Boris (`dictate_to_openclaw`). Details: `README.md`.
 
 Typora!
 
