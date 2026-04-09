@@ -598,6 +598,88 @@ class ActionRunner:
         else:
             self._log("[openclaw/env] openclaw tui already running")
 
+        companion_process = str(action.get("companion_process", "")).strip().lower()
+        companion_window_title = str(action.get("companion_window_title", "")).strip()
+        if platform_utils.use_windows_paths() and action.get("companion_command_windows"):
+            companion_command = str(action["companion_command_windows"]).strip()
+        elif not platform_utils.use_windows_paths() and action.get("companion_command_linux"):
+            companion_command = str(action["companion_command_linux"]).strip()
+        else:
+            companion_command = str(action.get("companion_command", "")).strip()
+
+        if companion_process or companion_window_title or companion_command:
+            companion_name = str(action.get("companion_name", "Companion")).strip() or "Companion"
+            self._log(f"[openclaw/env] companion launch/focus: {companion_name}")
+            self._run_focus_or_launch(
+                process_substring=companion_process,
+                window_title=companion_window_title,
+                launch_command=companion_command,
+            )
+
+    def _run_focus_or_launch(
+        self,
+        *,
+        process_substring: str,
+        window_title: str,
+        launch_command: str,
+    ) -> None:
+        process_substring = str(process_substring).strip().lower()
+        window_title = str(window_title).strip()
+        launch_command = str(launch_command).strip()
+
+        if not process_substring and not window_title:
+            self._log("[action/error] focus_or_launch requires 'process' or 'window_title'")
+            return
+        if not launch_command:
+            self._log("[action/error] focus_or_launch requires 'command'")
+            return
+
+        if window_title and platform_utils.use_windows_paths():
+            hwnd = self._find_window_by_title_substring(
+                window_title, process_substring
+            )
+            if hwnd is not None:
+                self._log(f"[action] focus by window_title '{window_title}' hwnd={hwnd}")
+                self._force_foreground(hwnd)
+                try:
+                    if win32gui is not None and win32gui.GetForegroundWindow() == hwnd:
+                        return
+                except Exception:
+                    pass
+                self._log(
+                    f"[action] foreground check failed for '{window_title}', launching"
+                )
+                platform_utils.run_command(launch_command)
+                return
+            self._log(f"[action] window_title '{window_title}' not found, launching")
+            platform_utils.run_command(launch_command)
+            return
+
+        all_pids = self._find_all_pids_for_process(process_substring)
+        if all_pids:
+            self._log(f"[action] found {len(all_pids)} pid(s) for '{process_substring}'")
+            windows = self._collect_windows_for_pids(all_pids)
+            self._log(f"[action] found {len(windows)} window(s) for '{process_substring}'")
+
+            if len(windows) == 1:
+                self._focus_window_by_id(windows[0][0])
+                return
+
+            if len(windows) > 1:
+                chosen_id = self._show_window_picker(windows)
+                if chosen_id is not None:
+                    self._focus_window_by_id(chosen_id)
+                    return
+                self._log(f"[action] window picker cancelled for '{process_substring}'")
+                return
+
+            self._log(f"[action] no windows found for '{process_substring}', launching")
+            platform_utils.run_command(launch_command)
+            return
+
+        self._log(f"[action] launching process '{process_substring}'")
+        platform_utils.run_command(launch_command)
+
     def _run_key_combo(self, combo: str) -> None:
         combo_text = str(combo).strip()
         if not combo_text:
@@ -720,59 +802,11 @@ class ActionRunner:
                     launch_command = str(action["command_windows"]).strip()
                 else:
                     launch_command = str(action.get("command", "")).strip()
-
-                if not process_substring and not window_title:
-                    self._log("[action/error] focus_or_launch requires 'process' or 'window_title'")
-                    return False
-                if not launch_command:
-                    self._log("[action/error] focus_or_launch requires 'command'")
-                    return False
-
-                if window_title and platform_utils.use_windows_paths():
-                    hwnd = self._find_window_by_title_substring(
-                        window_title, process_substring
-                    )
-                    if hwnd is not None:
-                        self._log(f"[action] focus by window_title '{window_title}' hwnd={hwnd}")
-                        self._force_foreground(hwnd)
-                        try:
-                            if win32gui is not None and win32gui.GetForegroundWindow() == hwnd:
-                                return False
-                        except Exception:
-                            pass
-                        self._log(
-                            f"[action] foreground check failed for '{window_title}', launching"
-                        )
-                        platform_utils.run_command(launch_command)
-                        return False
-                    self._log(f"[action] window_title '{window_title}' not found, launching")
-                    platform_utils.run_command(launch_command)
-                    return False
-
-                all_pids = self._find_all_pids_for_process(process_substring)
-                if all_pids:
-                    self._log(f"[action] found {len(all_pids)} pid(s) for '{process_substring}'")
-                    windows = self._collect_windows_for_pids(all_pids)
-                    self._log(f"[action] found {len(windows)} window(s) for '{process_substring}'")
-
-                    if len(windows) == 1:
-                        self._focus_window_by_id(windows[0][0])
-                        return False
-
-                    if len(windows) > 1:
-                        chosen_id = self._show_window_picker(windows)
-                        if chosen_id is not None:
-                            self._focus_window_by_id(chosen_id)
-                            return False
-                        self._log(f"[action] window picker cancelled for '{process_substring}'")
-                        return False
-
-                    self._log(f"[action] no windows found for '{process_substring}', launching")
-                    platform_utils.run_command(launch_command)
-                    return False
-
-                self._log(f"[action] launching process '{process_substring}'")
-                platform_utils.run_command(launch_command)
+                self._run_focus_or_launch(
+                    process_substring=process_substring,
+                    window_title=window_title,
+                    launch_command=launch_command,
+                )
                 return False
 
             if action_type == "url":

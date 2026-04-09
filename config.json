@@ -242,10 +242,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "73": {
           "type": "new_markdown_doc",
@@ -455,10 +459,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "73": {
           "type": "new_markdown_doc",
@@ -658,10 +666,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "73": {
           "type": "new_markdown_doc",
@@ -906,10 +918,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "79": {
           "type": "dictate_to_openclaw",
@@ -1048,10 +1064,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "82": {
           "type": "dictate_to_telegram",
@@ -1202,10 +1222,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "82": {
           "type": "dictate_to_telegram",
@@ -1336,10 +1360,14 @@
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
         "78": {
-          "type": "cmd",
-          "label": "Boris Thread UI",
-          "value": "openclaw tui",
-          "value_windows": "cmd /c start \"\" powershell -NoExit -ExecutionPolicy Bypass -Command \"openclaw tui\""
+          "type": "openclaw_smart_startup",
+          "label": "Boris + Hermes env",
+          "clawcommand_url": "http://127.0.0.1:4310",
+          "clawcommand_dir_windows": "F:\\ClawCommand",
+          "companion_name": "Hermes",
+          "companion_process": "telegram",
+          "companion_command_windows": "C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+          "companion_command_linux": "telegram-desktop"
         },
         "82": {
           "type": "dictate_to_telegram",

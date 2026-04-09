@@ -41,6 +41,44 @@ class OpenClawSmartStartupActionTests(unittest.TestCase):
         mock_ff.assert_called_once_with("http://127.0.0.1:4310")
         mock_tui_start.assert_called_once()
 
+    @patch.object(ActionRunner, "_run_focus_or_launch")
+    @patch.object(openclaw_env_mod, "start_openclaw_tui")
+    @patch.object(openclaw_env_mod, "is_openclaw_tui_running", return_value=False)
+    @patch.object(openclaw_env_mod, "ensure_clawcommand_running")
+    @patch("core.action_runner.time.sleep")
+    @patch.object(action_runner_mod.platform_utils, "open_url_in_firefox", return_value=True)
+    @patch.object(OpenClawSender, "open_control_dashboard")
+    @patch.object(OpenClawSender, "ensure_gateway_running")
+    def test_runs_companion_focus_or_launch_when_configured(
+        self,
+        _mock_ensure_gw: MagicMock,
+        _mock_dash: MagicMock,
+        _mock_ff: MagicMock,
+        _mock_sleep: MagicMock,
+        _mock_cc: MagicMock,
+        _mock_tui_running: MagicMock,
+        _mock_tui_start: MagicMock,
+        mock_companion: MagicMock,
+    ) -> None:
+        runner = ActionRunner(
+            logger=lambda _m: None,
+            on_profile_change=lambda _n: None,
+            on_toggle_flag=lambda _n: False,
+        )
+        runner._run_openclaw_smart_startup(
+            {
+                "type": "openclaw_smart_startup",
+                "companion_name": "Hermes",
+                "companion_process": "telegram",
+                "companion_command_windows": r'C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe',
+            }
+        )
+        mock_companion.assert_called_once_with(
+            process_substring="telegram",
+            window_title="",
+            launch_command=r'C:\\Users\\theve\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe',
+        )
+
     @patch.object(openclaw_env_mod, "start_openclaw_tui")
     @patch.object(openclaw_env_mod, "is_openclaw_tui_running", return_value=True)
     @patch.object(openclaw_env_mod, "ensure_clawcommand_running")
