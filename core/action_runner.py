@@ -566,6 +566,8 @@ class ActionRunner:
             self._log(f"[action] _force_foreground error: {exc}")
 
     def _run_openclaw_smart_startup(self, action: dict[str, Any]) -> None:
+        aggressive = bool(action.get("aggressive", True))
+
         try:
             self._openclaw_sender.ensure_gateway_running()
             self._log("[openclaw/env] gateway: ready")
@@ -581,7 +583,11 @@ class ActionRunner:
             self._openclaw_sender.notify("OpenClaw", f"Dashboard: {exc}")
 
         try:
-            openclaw_env.ensure_clawcommand_running(action, self._log)
+            if aggressive:
+                self._log("[openclaw/env] aggressive ClawCommand start requested")
+                openclaw_env.start_clawcommand_force(action, self._log)
+            else:
+                openclaw_env.ensure_clawcommand_running(action, self._log)
         except Exception as exc:
             self._log(f"[openclaw/env] ClawCommand start error: {exc}")
 
@@ -592,7 +598,10 @@ class ActionRunner:
                 self._log("[openclaw/env] Firefox not found; using default browser for ClawCommand")
                 platform_utils.open_url(url)
 
-        if not openclaw_env.is_openclaw_tui_running():
+        if aggressive:
+            self._log("[openclaw/env] aggressive openclaw tui start requested")
+            openclaw_env.start_openclaw_tui(self._log)
+        elif not openclaw_env.is_openclaw_tui_running():
             self._log("[openclaw/env] starting openclaw tui")
             openclaw_env.start_openclaw_tui(self._log)
         else:

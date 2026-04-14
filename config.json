@@ -237,7 +237,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -451,7 +452,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -655,7 +657,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -904,7 +907,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -1047,7 +1051,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -1202,7 +1207,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },
@@ -1337,7 +1343,8 @@
         },
         "77": {
           "type": "openclaw_smart_startup",
-          "label": "OpenClaw env (smart)",
+          "label": "OpenClaw env (aggressive)",
+          "aggressive": true,
           "clawcommand_url": "http://127.0.0.1:4310",
           "clawcommand_dir_windows": "F:\\ClawCommand"
         },

@@ -58,21 +58,15 @@ def _clawcommand_start_argv(action: dict) -> list[str] | None:
     return None
 
 
-def ensure_clawcommand_running(
+def _start_clawcommand_process(
     action: dict[str, object],
     logger: Callable[[str], None],
+    *,
+    reason: str,
 ) -> None:
-    url = str(action.get("clawcommand_url", "http://127.0.0.1:4310")).strip()
-    if not url:
-        logger("[openclaw/env] clawcommand_url empty; skip ClawCommand")
-        return
-    if service_url_reachable(url):
-        logger("[openclaw/env] ClawCommand already reachable")
-        return
-
     root = _clawcommand_root_dir(action)
     if not root:
-        logger("[openclaw/env] ClawCommand down; no clawcommand_dir* set — not starting server")
+        logger("[openclaw/env] no clawcommand_dir* set — not starting server")
         return
 
     root_path = Path(root)
@@ -83,7 +77,7 @@ def ensure_clawcommand_running(
     custom = _clawcommand_start_argv(action)
     cwd = str(root_path)
     if custom:
-        logger("[openclaw/env] ClawCommand not reachable; starting server")
+        logger(f"[openclaw/env] {reason}; starting server")
         subprocess.Popen(
             custom,
             cwd=cwd,
@@ -94,7 +88,7 @@ def ensure_clawcommand_running(
         return
 
     if (root_path / "package.json").is_file():
-        logger("[openclaw/env] ClawCommand not reachable; starting server")
+        logger(f"[openclaw/env] {reason}; starting server")
         if platform_utils.use_windows_paths():
             subprocess.Popen(
                 ["cmd", "/c", "npm", "start"],
@@ -114,6 +108,27 @@ def ensure_clawcommand_running(
         return
 
     logger(f"[openclaw/env] ClawCommand: no package.json in {root}, cannot start")
+
+
+def ensure_clawcommand_running(
+    action: dict[str, object],
+    logger: Callable[[str], None],
+) -> None:
+    url = str(action.get("clawcommand_url", "http://127.0.0.1:4310")).strip()
+    if not url:
+        logger("[openclaw/env] clawcommand_url empty; skip ClawCommand")
+        return
+    if service_url_reachable(url):
+        logger("[openclaw/env] ClawCommand already reachable")
+        return
+    _start_clawcommand_process(action, logger, reason="ClawCommand not reachable")
+
+
+def start_clawcommand_force(
+    action: dict[str, object],
+    logger: Callable[[str], None],
+) -> None:
+    _start_clawcommand_process(action, logger, reason="aggressive ClawCommand start requested")
 
 
 def is_openclaw_tui_running() -> bool:
